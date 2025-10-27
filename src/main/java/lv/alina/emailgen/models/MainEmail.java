@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
-import com.vaadin.flow.component.template.Id;
+
 
 @Table(name = "main_emails")
 @Entity
@@ -18,7 +18,7 @@ public class MainEmail {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Setter(value = AccessLevel.NONE)
 	@Column(name = "main_email_id", nullable = false, updatable = false)
-	private long mainEmailId;
+	private Long mainEmailId;
 	
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)
@@ -27,7 +27,7 @@ public class MainEmail {
 	@Column(name = "main_email", nullable = false, length = 64)
 	private String mainEmail;
 	
-	@Column(name = "cerated_at" , nullable = false)
+	@Column(name = "crated_at" , nullable = false)
 	private LocalDateTime createdAt = LocalDateTime.now();	
 	
 	@Column(name = "is_deleted")
