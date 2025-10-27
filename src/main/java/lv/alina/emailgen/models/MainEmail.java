@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 
 
-@Table(name = "main_emails")
+@Table(name = "main_emails", uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "main_email"})})
 @Entity
 @Getter
 @Setter
@@ -27,14 +27,17 @@ public class MainEmail {
 	@Column(name = "main_email", nullable = false, length = 64)
 	private String mainEmail;
 	
-	@Column(name = "crated_at" , nullable = false)
+	@Column(name = "created_at" , nullable = false)
 	private LocalDateTime createdAt = LocalDateTime.now();	
 	
-	@Column(name = "is_deleted")
+	@Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
-    @Column(name = "generation_count")
+    @Column(name = "generation_count", nullable = false)
     private Integer generationCount = 0;
+    
+    @Column(name = "last_used_at")
+    private LocalDateTime lastUsedAt;
 
     @PrePersist
     protected void onCreate() {
