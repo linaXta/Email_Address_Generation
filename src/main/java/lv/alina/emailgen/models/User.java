@@ -2,31 +2,30 @@ package lv.alina.emailgen.models;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
-
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.*;
 
-@Table(name = "users_table")
+@Table(name = "users")
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-@ToString
+@ToString(exclude = {"passwordHash", "mfaSecretEnc", "symbols", "companies", "shortCodes", "mainEmails"})
 public class User {
 	
 	@Id
-	@Column(name = "user_id")
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Setter(value = AccessLevel.NONE)
+	@Column(name = "user_id", nullable = false, updatable = false)
 	private Long userId;
+	
+	@Column(name = "email", nullable = false, unique = true, length = 255)
+	private String email;
 	
 	@Column(name = "password_hash", nullable = false, length = 255)
 	private String passwordHash;
-	
-	@Column(name = "email", nullable = false, unique = true, length = 64)
-	private String email;
 	
 	@Column(name = "full_name", length = 120)
 	private String fullName;
@@ -36,28 +35,37 @@ public class User {
 	
 	@Column(name = "mfa_secret_enc", length = 255)
     private String mfaSecretEnc;
+	
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt;
+   
+    @OneToMany(mappedBy = "user")
+    private List<Symbol> symbols = new ArrayList<>();
     
     @OneToMany(mappedBy = "user")
-    private Collection<MainEmail> mainEmails = new ArrayList<>();
+    private List<Company> companies = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "user")
+    private List<ShortCodes> shortCodes = new java.util.ArrayList<>();
+    
+    @OneToMany(mappedBy = "user")
+    private List<MainEmail> mainEmails = new ArrayList<>();
+    
+    @PrePersist
+    protected void onCreate() {
+    	this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
     
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
-    }
-    
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) createdAt = LocalDateTime.now();
-        if (updatedAt == null) updatedAt = LocalDateTime.now();
     }
 
 }
