@@ -10,8 +10,8 @@ public interface ICompanyRepo extends CrudRepository<Company, Long> {
 	
 	Company findByShortCode(String shortCode);
 	
-	boolean existByShortCode(String shortCode);
+	boolean existsByShortCode(String shortCode);
 	
-	boolean existByNameIgnoreCase(String name);
+	boolean existsByNameIgnoreCase(String name);
 
 }
