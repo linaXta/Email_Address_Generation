@@ -7,4 +7,6 @@ public interface IUserRepo extends CrudRepository<User, Long>{
 
 	User findByEmail(String email);
 	
+	boolean existsByEmail(String email);
+	
 }
