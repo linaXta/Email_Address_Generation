@@ -7,7 +7,7 @@ import lv.alina.emailgen.models.User;
 
 public interface IShortCodesRepo extends CrudRepository<ShortCodes, Long> {
 	
-	boolean existsByUserAndCode(User user, String shortCode);
+	boolean existsByUserAndShortCode(User user, String shortCode);
 	
 	ShortCodes findByUserAndShortCode(User user, String shortCode);
 

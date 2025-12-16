@@ -12,5 +12,4 @@ public interface IMainEmailRepo extends CrudRepository<MainEmail, Long>{
     
 	boolean existsByUserAndMainEmailIgnoreCase(User user, String mainEmail);
 	
-
 }
