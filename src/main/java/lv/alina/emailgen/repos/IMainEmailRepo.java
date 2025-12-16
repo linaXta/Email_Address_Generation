@@ -4,13 +4,13 @@ import org.springframework.data.repository.CrudRepository;
 
 import lv.alina.emailgen.models.Company;
 import lv.alina.emailgen.models.MainEmail;
+import lv.alina.emailgen.models.User;
 
 public interface IMainEmailRepo extends CrudRepository<MainEmail, Long>{
 	
-	MainEmail findByEmail(String email);
+	MainEmail findByUserAndMainEmail(User user, String mainEmail);
     
-	boolean existsByEmail(String email);
+	boolean existsByUserAndMainEmailIgnoreCase(User user, String mainEmail);
 	
-	boolean existsByCompanyAndEmail(String email, Company company);
 
 }
