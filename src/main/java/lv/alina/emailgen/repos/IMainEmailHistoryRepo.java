@@ -12,19 +12,19 @@ import lv.alina.emailgen.models.MainEmailHistory.ActionType;
 
 public interface IMainEmailHistoryRepo extends CrudRepository<MainEmailHistory, Long> {
 	
-    List<MainEmailHistory> findAllByMainEmailOrderByUpdatedAtDesc(MainEmail mainEmail);
+    List<MainEmailHistory> findAllByMainEmailOrderByEventTimeDesc(MainEmail mainEmail);
 
-    List<MainEmailHistory> findAllByMainEmailOrderByUpdatedAtAsc(MainEmail mainEmail);
+    List<MainEmailHistory> findAllByMainEmailOrderByEventTimeAsc(MainEmail mainEmail);
 
-    List<MainEmailHistory> findAllByMainEmailAndActionTypeOrderByUpdatedAtDesc(
+    List<MainEmailHistory> findAllByMainEmailAndActionTypeOrderByEventTimeDesc(
             MainEmail mainEmail, ActionType actionType
     );
 
-    List<MainEmailHistory> findAllByMainEmailAndUpdatedAtBetweenOrderByUpdatedAtDesc(
+    List<MainEmailHistory> findAllByMainEmailAndEventTimeBetweenOrderByEventTimeDesc(
             MainEmail mainEmail, LocalDateTime from, LocalDateTime to
     );
 
-    List<MainEmailHistory> findAllByMainEmailAndUpdatedAtBetweenOrderByUpdatedAtAsc(
+    List<MainEmailHistory> findAllByMainEmailAndEventTimeBetweenOrderByEventTimeAsc(
             MainEmail mainEmail, LocalDateTime from, LocalDateTime to
     );
 
