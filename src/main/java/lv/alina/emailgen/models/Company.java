@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Table(name = "companies", uniqueConstraints = @UniqueConstraint(name = "unique_user_company_name",columnNames = {"user_id", "company_name"}))

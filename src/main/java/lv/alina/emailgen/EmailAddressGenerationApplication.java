@@ -8,11 +8,6 @@ import org.springframework.boot.CommandLineRunner;
 import javax.sql.DataSource;
 import java.sql.Connection;
 
-import lv.alina.emailgen.models.MainEmail;
-import lv.alina.emailgen.models.User;
-import lv.alina.emailgen.repos.IMainEmailRepo;
-import lv.alina.emailgen.repos.IUserRepo;
-
 @SpringBootApplication
 public class EmailAddressGenerationApplication {
 
