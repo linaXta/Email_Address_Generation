@@ -7,8 +7,8 @@ import lv.alina.emailgen.models.GeneratedEmail;
 
 public interface IGeneratedEmailRepo extends CrudRepository<GeneratedEmail, Long>{
 	
-	boolean existsByEmail(String email);
+	boolean existsByGeneratedEmailAddress(String generatedEmailAddress);
 	
-	boolean existsByCompanyAndEmail(String email, Company company);
+	boolean existsByCompanyAndGeneratedEmailAddress(Company company, String generatedEmailAddress);
 
 }
