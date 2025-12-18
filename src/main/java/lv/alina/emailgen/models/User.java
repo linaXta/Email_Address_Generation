@@ -67,5 +67,17 @@ public class User {
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+    
+    public User(String email, String passwordHash, String fullName) {
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.fullName = fullName;
+        this.mfaEnabled = false;
+    }
+    
+    public User() {
+    	
+    }
 
+    
 }

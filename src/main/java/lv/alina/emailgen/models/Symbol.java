@@ -23,5 +23,13 @@ public class Symbol {
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_symbol_user"))
     private User user;
+    
+    public Symbol(User user, String symbol) {
+        this.user = user;
+        this.symbol = symbol;
+    }
+    
+    public Symbol() {
+    }
 
 }

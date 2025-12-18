@@ -68,5 +68,20 @@ public class Company {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+    
+    public Company(User user, String companyName, String notes, Symbol symbolBeforeShortcode, Symbol symbolBeforeSequence) {
+        this.user = user;
+        this.companyName = companyName;
+        this.notes = notes;
+        this.symbolBeforeShortcode = symbolBeforeShortcode;
+        this.symbolBeforeSequence = symbolBeforeSequence;
+    }
+    
+    public void setCurrentShortCode(ShortCodes currentShortCode) {
+        this.currentShortCode = currentShortCode;
+    }
+    
+    public Company() {
+    }
 
 }

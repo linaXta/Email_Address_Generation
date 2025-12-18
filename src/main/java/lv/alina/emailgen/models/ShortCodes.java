@@ -30,5 +30,14 @@ public class ShortCodes {
     
     @OneToMany(mappedBy = "shortCode")
     private java.util.List<ShortCodeCounter> counters = new java.util.ArrayList<>();
+    
+    public ShortCodes(User user, Company company, String shortCode) {
+        this.user = user;
+        this.company = company;
+        this.shortCode = shortCode;
+    }
+    
+    public ShortCodes() {
+    }
 
 }

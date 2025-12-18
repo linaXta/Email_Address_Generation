@@ -52,4 +52,13 @@ public class MainEmail {
         this.createdAt = LocalDateTime.now();
     }
     
+    public MainEmail(User user, String mainEmail) {
+        this.user = user;
+        this.mainEmail = mainEmail;
+        this.generationCount = 0;
+    }
+
+    public MainEmail() {
+    }
+    
 }
