@@ -36,8 +36,5 @@ public class ShortCodes {
         this.company = company;
         this.shortCode = shortCode;
     }
-    
-    public ShortCodes() {
-    }
 
 }

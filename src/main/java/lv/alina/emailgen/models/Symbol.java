@@ -28,8 +28,5 @@ public class Symbol {
         this.user = user;
         this.symbol = symbol;
     }
-    
-    public Symbol() {
-    }
 
 }

@@ -57,8 +57,5 @@ public class MainEmail {
         this.mainEmail = mainEmail;
         this.generationCount = 0;
     }
-
-    public MainEmail() {
-    }
     
 }

@@ -81,7 +81,5 @@ public class Company {
         this.currentShortCode = currentShortCode;
     }
     
-    public Company() {
-    }
 
 }

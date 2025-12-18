@@ -75,9 +75,4 @@ public class User {
         this.mfaEnabled = false;
     }
     
-    public User() {
-    	
-    }
-
-    
 }
