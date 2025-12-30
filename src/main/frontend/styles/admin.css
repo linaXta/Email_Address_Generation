@@ -3,7 +3,6 @@ html, body {
   margin: 0;
 }
 
-/* visa admin lapa */
 .admin-page {
   min-height: 100vh;
   background-color: #f6ead5;
@@ -11,7 +10,6 @@ html, body {
   box-sizing: border-box;
 }
 
-/* centrālā kartīte */
 .admin-card {
   background-color: #f6ead5;
   border: 2px solid #1f1f1f;
@@ -21,7 +19,10 @@ html, body {
   margin: 0 auto;
 }
 
-/* virsraksts */
 .admin-title {
   margin: 0 0 16px 0;
+}
+
+.topbar {
+  gap: 12px;
 }
