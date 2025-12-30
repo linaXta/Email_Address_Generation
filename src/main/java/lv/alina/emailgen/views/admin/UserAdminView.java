@@ -1,24 +1,51 @@
 package lv.alina.emailgen.views.admin;
 
+import java.util.ArrayList;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
 import lv.alina.emailgen.models.User;
+import lv.alina.emailgen.service.ICRUDUserService;
 
 
 @Route("admin/users")
 @CssImport("./styles/admin.css")
 public class UserAdminView extends VerticalLayout {
 	
-	public UserAdminView() {
+	private final ICRUDUserService userService;
+	
+    private Grid<User> grid;
+    
+    private TextField searchField;
+    private Button refreshBtn;
+
+    private TextField emailField;
+    private TextField fullNameField;
+    private TextField passwordHashField;
+    private Checkbox mfaField;
+
+    private Button createBtn;
+    private Button updateBtn;
+    private Button deleteBtn;
+    private Button clearBtn;
+    
+    private ArrayList<User> allUsers = new ArrayList<>();
+    private Long selectedUserId = null;
+
+	
+	public UserAdminView(ICRUDUserService userService) {
+		this.userService = userService;
+		
 	    addClassName("admin-page");
 	    setSizeFull();
 
@@ -26,25 +53,28 @@ public class UserAdminView extends VerticalLayout {
 	    card.addClassName("admin-card");
 	    card.setWidthFull();
 	    card.setMaxWidth("1100px");
+	    add(card);
 
 	    H1 title = new H1("User admin panel");
 	    title.addClassName("admin-title");
+	    card.add(title);
 
 	    // Augšēja sadaļa
-	    TextField searchField = new TextField("Search email");
+	    searchField = new TextField("Search email");
 	    searchField.setPlaceholder("type part of email...");
 	    searchField.setClearButtonVisible(true);
 
-	    Button refreshBtn = new Button("Refresh");
+	    refreshBtn = new Button("Refresh");
 	    refreshBtn.addClassName("btn");
 
 	    HorizontalLayout topBar = new HorizontalLayout(searchField, refreshBtn);
-	    topBar.setWidthFull();
-	    topBar.setAlignItems(Alignment.END);
 	    topBar.addClassName("topbar");
+	    topBar.setWidthFull();
+	    topBar.setAlignItems(Alignment.END); // pielīdzināt apakšai
+	    card.add(topBar);
 
 	    // tabula
-        Grid<User> grid = new Grid<>(User.class, false);
+        grid = new Grid<>(User.class, false);
         grid.addColumn(User::getUserId).setHeader("ID").setAutoWidth(true);
         grid.addColumn(User::getEmail).setHeader("Email").setAutoWidth(true);
         grid.addColumn(User::getFullName).setHeader("Full name").setAutoWidth(true);
@@ -53,12 +83,13 @@ public class UserAdminView extends VerticalLayout {
         grid.addClassName("admin-grid");
         grid.setWidthFull();
         grid.setHeight("360px");
+        card.add(grid);
 
         // form
-        TextField emailField = new TextField("Email");
-        TextField fullNameField = new TextField("Full name");
-        TextField passwordHashField = new TextField("Password hash");
-        Checkbox mfaField = new Checkbox("MFA enabled");
+        emailField = new TextField("Email");
+        fullNameField = new TextField("Full name");
+        passwordHashField = new TextField("Password hash");
+        mfaField = new Checkbox("MFA enabled");
 
         emailField.setWidthFull();
         fullNameField.setWidthFull();
@@ -67,7 +98,6 @@ public class UserAdminView extends VerticalLayout {
         FormLayout form = new FormLayout();
         form.addClassName("admin-form");
         form.setWidthFull();
-
         form.setResponsiveSteps(
             new FormLayout.ResponsiveStep("0", 1),
             new FormLayout.ResponsiveStep("700px", 3)
@@ -75,26 +105,39 @@ public class UserAdminView extends VerticalLayout {
 
         form.add(emailField, fullNameField, passwordHashField);
         form.add(mfaField);
+        card.add(form);
 
         // buttons
-        Button createBtn = new Button("Create user");
-        Button updateBtn = new Button("Update user");
-        Button deleteBtn = new Button("Delete user");
-        Button clearBtn = new Button("Clear");
+        createBtn = new Button("Create user");
+        updateBtn = new Button("Update user");
+        deleteBtn = new Button("Delete user");
+        clearBtn = new Button("Clear");
 
         createBtn.addClassNames("btn", "primary");
         updateBtn.addClassNames("btn");
         deleteBtn.addClassNames("btn", "danger");
         clearBtn.addClassNames("btn");
 
-        HorizontalLayout actions = new HorizontalLayout(
-                createBtn, updateBtn, deleteBtn, clearBtn
-        );
+        HorizontalLayout actions = new HorizontalLayout(createBtn, updateBtn, deleteBtn, clearBtn);
         actions.addClassName("actions");
         actions.setWidthFull();
+        card.add(actions);
+        
+        refreshBtn.addClickListener(e -> loadUsers());
+        
+        loadUsers();
 
         card.add(title, topBar, grid, form, actions);
         add(card);
+    }
+	
+	private void loadUsers() {
+        try {
+            allUsers = userService.retrieveAll();
+            grid.setItems(allUsers);
+        } catch (Exception e) {
+            Notification.show("Error appear loading users: " + e.getMessage(), 4000, Notification.Position.MIDDLE);
+        }
     }
 
     
