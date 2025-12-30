@@ -32,3 +32,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Vaadin frontend (dev mode generated) ###
+src/main/frontend/generated/
+src/main/bundles/
+package.json
+package-lock.json
+pnpm-lock.yaml
+vite.config.ts
+vite.generated.ts
+tsconfig.json
+types.d.ts
