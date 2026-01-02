@@ -84,6 +84,36 @@ public class UserAdminView extends VerticalLayout {
         grid.setWidthFull();
         grid.setHeight("360px");
         card.add(grid);
+        
+        grid.asSingleSelect().addValueChangeListener(event -> {
+            User selectedUser = event.getValue();
+
+            if (selectedUser == null) {
+                clearForm();
+                return;
+            }
+
+            selectedUserId = selectedUser.getUserId();
+
+            if (selectedUser.getEmail() != null) {
+                emailField.setValue(selectedUser.getEmail());
+            } else {
+                emailField.clear();
+            }
+
+            if (selectedUser.getFullName() != null) {
+                fullNameField.setValue(selectedUser.getFullName());
+            } else {
+                fullNameField.clear();
+            }
+
+            mfaField.setValue(selectedUser.isMfaEnabled());
+
+            // neradit paroli no db
+            passwordHashField.clear();
+
+            updateButtonsState();
+        });
 
         // form
         emailField = new TextField("Email");
@@ -126,6 +156,8 @@ public class UserAdminView extends VerticalLayout {
         refreshBtn.addClickListener(e -> loadUsers());
         
         loadUsers();
+        updateButtonsState();
+        
 
         card.add(title, topBar, grid, form, actions);
         add(card);
@@ -139,6 +171,23 @@ public class UserAdminView extends VerticalLayout {
             Notification.show("Error appear loading users: " + e.getMessage(), 4000, Notification.Position.MIDDLE);
         }
     }
+	
+	private void clearForm() {
+	    selectedUserId = null;
+
+	    emailField.clear();
+	    fullNameField.clear();
+	    passwordHashField.clear();
+	    mfaField.setValue(false);
+
+	    updateButtonsState();
+	}
+
+	private void updateButtonsState() {
+	    boolean selected = selectedUserId != null;
+	    updateBtn.setEnabled(selected);
+	    deleteBtn.setEnabled(selected);
+	}
 
     
 }
