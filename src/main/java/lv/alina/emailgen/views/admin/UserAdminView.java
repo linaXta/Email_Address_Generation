@@ -131,6 +131,8 @@ public class UserAdminView extends VerticalLayout {
         
         clearBtn.addClickListener(e -> clearForm());
         
+        createBtn.addClickListener(e -> createUser());
+        
         grid.asSingleSelect().addValueChangeListener(event -> {
             User selectedUser = event.getValue();
 
@@ -234,6 +236,43 @@ public class UserAdminView extends VerticalLayout {
 	    }
 
 	    grid.setItems(filteredUsers);
+	}
+	
+	private void createUser() {
+		try {
+			String email = emailField.getValue();
+			String fullName = fullNameField.getValue();
+			String passwordHash = passwordHashField.getValue();
+			
+			if (email == null ) {
+				Notification.show("Email is required", 3000, Notification.Position.MIDDLE);
+				return;
+			}
+			
+			if (email.trim().equals("")) {
+				Notification.show("Email is required", 3000, Notification.Position.MIDDLE);
+			    return;
+			}
+			
+			if (passwordHash == null) {
+			    Notification.show("Password hash is required", 2500, Notification.Position.MIDDLE);
+			    return;
+			}
+
+			if (passwordHash.trim().equals("")) {
+			    Notification.show("Password hash is required", 2500, Notification.Position.MIDDLE);
+			    return;
+			}
+			
+			userService.createUser(email, passwordHash, fullName);
+			Notification.show("User created", 3000, Notification.Position.TOP_END);
+			
+			clearForm();
+	        loadUsers();
+	        filterUsers();
+		} catch (Exception e) {
+			Notification.show("Faild to cerate User: " + e.getMessage(), 4000,Notification.Position.MIDDLE);
+		}
 	}
 
     
