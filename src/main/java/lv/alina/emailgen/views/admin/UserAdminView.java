@@ -53,7 +53,6 @@ public class UserAdminView extends VerticalLayout {
 	    card.addClassName("admin-card");
 	    card.setWidthFull();
 	    card.setMaxWidth("1100px");
-	    add(card);
 
 	    H1 title = new H1("User admin panel");
 	    title.addClassName("admin-title");
@@ -84,36 +83,6 @@ public class UserAdminView extends VerticalLayout {
         grid.setWidthFull();
         grid.setHeight("360px");
         card.add(grid);
-        
-        grid.asSingleSelect().addValueChangeListener(event -> {
-            User selectedUser = event.getValue();
-
-            if (selectedUser == null) {
-                clearForm();
-                return;
-            }
-
-            selectedUserId = selectedUser.getUserId();
-
-            if (selectedUser.getEmail() != null) {
-                emailField.setValue(selectedUser.getEmail());
-            } else {
-                emailField.clear();
-            }
-
-            if (selectedUser.getFullName() != null) {
-                fullNameField.setValue(selectedUser.getFullName());
-            } else {
-                fullNameField.clear();
-            }
-
-            mfaField.setValue(selectedUser.isMfaEnabled());
-
-            // neradit paroli no db
-            passwordHashField.clear();
-
-            updateButtonsState();
-        });
 
         // form
         emailField = new TextField("Email");
@@ -153,16 +122,54 @@ public class UserAdminView extends VerticalLayout {
         actions.setWidthFull();
         card.add(actions);
         
-        refreshBtn.addClickListener(e -> loadUsers());
+        refreshBtn.addClickListener(e -> {
+            loadUsers();
+            filterUsers();
+        });
+        
+        searchField.addValueChangeListener(e -> filterUsers());
+        
+        clearBtn.addClickListener(e -> clearForm());
+        
+        grid.asSingleSelect().addValueChangeListener(event -> {
+            User selectedUser = event.getValue();
+
+            if (selectedUser == null) {
+                clearForm();
+                return;
+            }
+
+            selectedUserId = selectedUser.getUserId();
+
+            if (selectedUser.getEmail() != null) {
+                emailField.setValue(selectedUser.getEmail());
+            } else {
+                emailField.clear();
+            }
+
+            if (selectedUser.getFullName() != null) {
+                fullNameField.setValue(selectedUser.getFullName());
+            } else {
+                fullNameField.clear();
+            }
+
+            mfaField.setValue(selectedUser.isMfaEnabled());
+
+            // neradit paroli no db
+            passwordHashField.clear();
+
+            updateButtonsState();
+        });
         
         loadUsers();
+        filterUsers();
         updateButtonsState();
         
-
-        card.add(title, topBar, grid, form, actions);
         add(card);
     }
 	
+	
+	// -----
 	private void loadUsers() {
         try {
             allUsers = userService.retrieveAll();
@@ -179,6 +186,8 @@ public class UserAdminView extends VerticalLayout {
 	    fullNameField.clear();
 	    passwordHashField.clear();
 	    mfaField.setValue(false);
+	    
+	    grid.asSingleSelect().clear();
 
 	    updateButtonsState();
 	}
@@ -187,6 +196,44 @@ public class UserAdminView extends VerticalLayout {
 	    boolean selected = selectedUserId != null;
 	    updateBtn.setEnabled(selected);
 	    deleteBtn.setEnabled(selected);
+	}
+	
+	private void filterUsers() {
+	    String query = searchField.getValue();
+
+	    // ja nekas nav ierakstīts
+	    if (query == null) {
+	        grid.setItems(allUsers);
+	        return;
+	    }
+
+	    // atstarpes
+	    String trimmedQuery = query.trim();
+
+	    // ja tikkai atstarpes
+	    if (trimmedQuery.isEmpty()) {
+	        grid.setItems(allUsers);
+	        return;
+	    }
+
+	    String searchText = trimmedQuery.toLowerCase();
+	    ArrayList<User> filteredUsers = new ArrayList<>();
+
+	    for (User user : allUsers) {
+
+	        String email = user.getEmail();
+	        if (email == null) {
+	            email = "";
+	        }
+
+	        String emailLowerCase = email.toLowerCase();
+
+	        if (emailLowerCase.contains(searchText)) {
+	            filteredUsers.add(user);
+	        }
+	    }
+
+	    grid.setItems(filteredUsers);
 	}
 
     
