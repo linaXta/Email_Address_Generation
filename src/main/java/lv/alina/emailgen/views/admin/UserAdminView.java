@@ -247,14 +247,9 @@ public class UserAdminView extends VerticalLayout {
 			String fullName = fullNameField.getValue();
 			String passwordHash = passwordHashField.getValue();
 			
-			if (email == null ) {
+			if (email == null || email.trim().isEmpty() ) {
 				Notification.show("Email is required", 4000, Notification.Position.MIDDLE);
 				return;
-			}
-			
-			if (email.trim().equals("")) {
-				Notification.show("Email is required", 4000, Notification.Position.MIDDLE);
-			    return;
 			}
 			
 			if (passwordHash == null) {
@@ -289,12 +284,7 @@ public class UserAdminView extends VerticalLayout {
 			String fullName = fullNameField.getValue();
 			boolean mfaEnabled = mfaField.getValue();
 			
-			if (email == null) {
-				Notification.show("Email is needed", 4000, Notification.Position.MIDDLE);
-				return;
-			}
-			
-			if (email.trim().equals("")) {
+			if (email == null || email.trim().isEmpty()) {
 				Notification.show("Email is needed", 4000, Notification.Position.MIDDLE);
 				return;
 			}
