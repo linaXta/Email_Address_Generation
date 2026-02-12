@@ -133,6 +133,9 @@ public class UserAdminView extends VerticalLayout {
         
         createBtn.addClickListener(e -> createUser());
         
+        updateBtn.addClickListener(e -> updateUser());
+        
+        
         grid.asSingleSelect().addValueChangeListener(event -> {
             User selectedUser = event.getValue();
 
@@ -245,12 +248,12 @@ public class UserAdminView extends VerticalLayout {
 			String passwordHash = passwordHashField.getValue();
 			
 			if (email == null ) {
-				Notification.show("Email is required", 3000, Notification.Position.MIDDLE);
+				Notification.show("Email is required", 4000, Notification.Position.MIDDLE);
 				return;
 			}
 			
 			if (email.trim().equals("")) {
-				Notification.show("Email is required", 3000, Notification.Position.MIDDLE);
+				Notification.show("Email is required", 4000, Notification.Position.MIDDLE);
 			    return;
 			}
 			
@@ -265,13 +268,46 @@ public class UserAdminView extends VerticalLayout {
 			}
 			
 			userService.createUser(email, passwordHash, fullName);
-			Notification.show("User created", 3000, Notification.Position.TOP_END);
+			Notification.show("User created", 4000, Notification.Position.TOP_END);
 			
 			clearForm();
 	        loadUsers();
 	        filterUsers();
 		} catch (Exception e) {
 			Notification.show("Faild to cerate User: " + e.getMessage(), 4000,Notification.Position.MIDDLE);
+			return;
+		}
+	}
+	
+	private void updateUser() {
+		if (selectedUserId == null) {
+			Notification.show("Select a user first", 4000, Notification.Position.MIDDLE);
+		}
+		try {
+			String email = emailField.getValue();
+			String fullName = fullNameField.getValue();
+			boolean mfaEnabled = mfaField.getValue();
+			
+			if (email == null) {
+				Notification.show("Email is needed", 4000, Notification.Position.MIDDLE);
+				return;
+			}
+			
+			if (email.trim().equals("")) {
+				Notification.show("Email is needed", 4000, Notification.Position.MIDDLE);
+				return;
+			}
+			
+			userService.updateUser(selectedUserId, email, fullName, mfaEnabled);
+			Notification.show("User updated", 4000, Notification.Position.TOP_END);
+			
+			clearForm();
+			loadUsers();
+			filterUsers();
+			
+			
+		} catch (Exception e) {
+			Notification.show("Failed to update User: " + e.getMessage(), 4000, Notification.Position.MIDDLE);
 		}
 	}
 
