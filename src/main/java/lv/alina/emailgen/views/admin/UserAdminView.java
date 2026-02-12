@@ -282,6 +282,7 @@ public class UserAdminView extends VerticalLayout {
 	private void updateUser() {
 		if (selectedUserId == null) {
 			Notification.show("Select a user first", 4000, Notification.Position.MIDDLE);
+			return;
 		}
 		try {
 			String email = emailField.getValue();
