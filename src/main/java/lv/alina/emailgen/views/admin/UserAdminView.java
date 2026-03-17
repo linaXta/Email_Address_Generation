@@ -1,9 +1,11 @@
 package lv.alina.emailgen.views.admin;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -41,6 +43,8 @@ public class UserAdminView extends VerticalLayout {
     
     private ArrayList<User> allUsers = new ArrayList<>();
     private Long selectedUserId = null;
+    
+    private static final Pattern email_pattern = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
 	
 	public UserAdminView(ICRUDUserService userService) {
@@ -135,6 +139,9 @@ public class UserAdminView extends VerticalLayout {
         
         updateBtn.addClickListener(e -> updateUser());
         
+        deleteBtn.addClickListener(e -> deleteUser());
+
+        
         
         grid.asSingleSelect().addValueChangeListener(event -> {
             User selectedUser = event.getValue();
@@ -180,7 +187,7 @@ public class UserAdminView extends VerticalLayout {
             allUsers = userService.retrieveAll();
             grid.setItems(allUsers);
         } catch (Exception e) {
-            Notification.show("Error appear loading users: " + e.getMessage(), 4000, Notification.Position.MIDDLE);
+            Notification.show("Error appear loading users: " + e.getMessage(), 4000, Notification.Position.TOP_CENTER);
         }
     }
 	
@@ -241,6 +248,13 @@ public class UserAdminView extends VerticalLayout {
 	    grid.setItems(filteredUsers);
 	}
 	
+	private boolean isEmailValid(String email) {
+		if (email == null) {
+			return false;
+		}
+		return email_pattern.matcher(email).matches();
+	}
+	
 	private void createUser() {
 		try {
 			String email = emailField.getValue();
@@ -248,35 +262,42 @@ public class UserAdminView extends VerticalLayout {
 			String passwordHash = passwordHashField.getValue();
 			
 			if (email == null || email.trim().isEmpty() ) {
-				Notification.show("Email is required", 4000, Notification.Position.MIDDLE);
+				Notification.show("Email is required", 4000, Notification.Position.TOP_CENTER);
 				return;
 			}
 			
-			if (passwordHash == null) {
-			    Notification.show("Password hash is required", 2500, Notification.Position.MIDDLE);
-			    return;
+			email = email.trim();
+			if (!isEmailValid(email)) {
+				Notification.show("Email format is not valid", 4000, Notification.Position.TOP_CENTER);
+				return;
 			}
-
-			if (passwordHash.trim().equals("")) {
-			    Notification.show("Password hash is required", 2500, Notification.Position.MIDDLE);
+			
+			for (User user : allUsers) {
+				if (user.getEmail() != null && user.getEmail().equalsIgnoreCase(email)) {
+					Notification.show("This email already is registered", 4000, Notification.Position.TOP_CENTER);
+					return;
+				}
+			}
+			
+			if (passwordHash == null || passwordHash.trim().isEmpty()) {
+			    Notification.show("Password hash is required", 2500, Notification.Position.TOP_CENTER);
 			    return;
 			}
 			
 			userService.createUser(email, passwordHash, fullName);
-			Notification.show("User created", 4000, Notification.Position.TOP_END);
+			Notification.show("User created", 4000, Notification.Position.TOP_CENTER);
 			
 			clearForm();
 	        loadUsers();
 	        filterUsers();
 		} catch (Exception e) {
-			Notification.show("Faild to cerate User: " + e.getMessage(), 4000,Notification.Position.MIDDLE);
-			return;
+			Notification.show("Faild to cerate User: " + e.getMessage(), 4000,Notification.Position.TOP_CENTER);
 		}
 	}
 	
 	private void updateUser() {
 		if (selectedUserId == null) {
-			Notification.show("Select a user first", 4000, Notification.Position.MIDDLE);
+			Notification.show("Select a user first", 4000, Notification.Position.TOP_CENTER);
 			return;
 		}
 		try {
@@ -285,12 +306,26 @@ public class UserAdminView extends VerticalLayout {
 			boolean mfaEnabled = mfaField.getValue();
 			
 			if (email == null || email.trim().isEmpty()) {
-				Notification.show("Email is needed", 4000, Notification.Position.MIDDLE);
+				Notification.show("Email is needed", 4000, Notification.Position.TOP_CENTER);
 				return;
 			}
 			
+			email = email.trim();
+			
+			if (!isEmailValid(email)) {
+				Notification.show("Email format is not valid", 4000, Notification.Position.TOP_CENTER);
+				return;
+			}
+			
+			for (User user : allUsers) {
+	            if (user.getEmail() != null && user.getEmail().equalsIgnoreCase(email) && !user.getUserId().equals(selectedUserId)) {
+	                Notification.show("User with this email already exists", 4000, Notification.Position.TOP_CENTER);
+	                return;
+	            }
+	        }
+						
 			userService.updateUser(selectedUserId, email, fullName, mfaEnabled);
-			Notification.show("User updated", 4000, Notification.Position.TOP_END);
+			Notification.show("User updated", 4000, Notification.Position.TOP_CENTER);
 			
 			clearForm();
 			loadUsers();
@@ -298,9 +333,49 @@ public class UserAdminView extends VerticalLayout {
 			
 			
 		} catch (Exception e) {
-			Notification.show("Failed to update User: " + e.getMessage(), 4000, Notification.Position.MIDDLE);
+			Notification.show("Failed to update User: " + e.getMessage(), 4000, Notification.Position.TOP_CENTER);
 		}
 	}
-
+	
+	private void deleteUser() {
+		if (selectedUserId == null) {
+			Notification.show("Select a user first", 4000, Notification.Position.TOP_CENTER);
+			return;
+		}
+		
+		String selectedEmail = "";
+		for (User user : allUsers) {
+			if (user.getUserId().equals(selectedUserId)) {
+				if (user.getEmail() != null) {
+					selectedEmail = user.getEmail();
+				}
+				break;
+			}
+		}
+		
+		ConfirmDialog dialog = new ConfirmDialog();
+		dialog.setHeader("Delete user");
+		dialog.setText("Are you sure to delete user:\n" + selectedEmail);
+		dialog.setCancelable(true);
+		dialog.setConfirmText("Delete");
+		dialog.setCancelText("Cancel");
+		
+		dialog.addConfirmListener(event -> {
+			try {
+				userService.deleteById(selectedUserId);
+				
+				Notification.show("User deleted", 4000, Notification.Position.TOP_CENTER);
+				
+				clearForm();
+				loadUsers();
+				filterUsers();
+				
+			}catch (Exception e) {
+				Notification.show("Failed to delete user: " + e.getMessage(), 4000, Notification.Position.TOP_CENTER);				
+			}
+		});
+		dialog.open();
+	}
+	
     
 }
