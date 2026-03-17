@@ -2,6 +2,7 @@ package lv.alina.emailgen.services.impl;
 
 import java.util.ArrayList;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lv.alina.emailgen.models.User;
@@ -12,9 +13,11 @@ import lv.alina.emailgen.service.ICRUDUserService;
 public class CRUDUserServiceImpl implements ICRUDUserService{
 	
 	private final IUserRepo userRepo;
+	private final PasswordEncoder passwordEncoder;
 	
-	public CRUDUserServiceImpl(IUserRepo userRepo) {
+	public CRUDUserServiceImpl(IUserRepo userRepo,PasswordEncoder passwordEncoder) {
         this.userRepo = userRepo;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -48,6 +51,34 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
 
         User user = new User(email, passwordHash, fullName);
         return userRepo.save(user);
+    }
+    
+    @Override
+    public User registerUser(String email, String rawPassword) throws Exception {
+    	if (email == null || email.isBlank()) {
+    		throw new Exception("Email is needed");
+    	}
+    	
+    	if (rawPassword == null || rawPassword.isBlank()) {
+    		throw new Exception("Password is needed");
+    	}
+    	
+    	String normalizedEmail = email.trim().toLowerCase();
+    	
+    	if (userRepo.existsByEmail(normalizedEmail)) {
+            throw new Exception("User with this email already exists");
+        }
+    	
+    	String passwordHash = passwordEncoder.encode(rawPassword);
+    	
+    	User user = new User();
+        user.setEmail(normalizedEmail);
+        user.setPasswordHash(passwordHash);
+        user.setFullName(null);
+        user.setMfaEnabled(false);
+        
+        return userRepo.save(user);
+    	
     }
 
     @Override
