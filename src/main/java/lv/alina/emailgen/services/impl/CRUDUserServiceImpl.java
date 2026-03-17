@@ -84,7 +84,7 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
     @Override
     public User updateUser(Long id, String email, String fullName, boolean mfaEnabled) throws Exception {
         User user = userRepo.findById(id)
-            .orElseThrow(() -> new Exception("User is not found whit id = " + id));
+            .orElseThrow(() -> new Exception("User is not found with id = " + id));
 
         user.setEmail(email);
         user.setFullName(fullName);
