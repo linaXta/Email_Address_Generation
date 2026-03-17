@@ -9,5 +9,7 @@ public interface ICRUDUserService extends ICRUDBase<User>{
     User updateUser(Long id, String email, String fullName, boolean mfaEnabled) throws Exception;
     
     User registerUser(String email, String rawPassword) throws Exception;
+    
+    boolean existsByEmail(String email) throws Exception;
 
 }

@@ -92,5 +92,15 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
 
         return userRepo.save(user);
     }
+    
+    @Override
+    public boolean existsByEmail(String email) throws Exception {
+        if (email == null || email.isBlank()) {
+            return false;
+        }
+
+        String normalizedEmail = email.trim().toLowerCase();
+        return userRepo.existsByEmail(normalizedEmail);
+    }
 
 }
