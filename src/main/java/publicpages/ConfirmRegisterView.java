@@ -28,6 +28,7 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
     private PasswordField passwordField;
     private PasswordField confirmPasswordField;
     private Paragraph message;
+    private Paragraph emailInfo;
     
     public ConfirmRegisterView(ICRUDUserService userService) {
         this.userService = userService;
@@ -44,6 +45,10 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
 
         if (email.isBlank()) {
             event.forwardTo("register");
+        }
+        
+        if (emailInfo != null) {
+            emailInfo.setText("A confirmation code was sent to " + email);
         }
     }
     
@@ -80,6 +85,9 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
 
         H2 title = new H2("Confirm and create your Account!");
         title.addClassName("auth-title");
+        
+        emailInfo = new Paragraph();
+        emailInfo.addClassName("auth-subtitle");
 
         VerticalLayout form = new VerticalLayout() ;
         form.setPadding(false);
@@ -120,7 +128,7 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
                 createButton
         );
 
-        content.add(title, form);
+        content.add(title, emailInfo, form);
         shell.add(topLeft, content);
         add(shell);
     }
