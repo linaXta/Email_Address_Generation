@@ -15,6 +15,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import lv.alina.emailgen.service.ICRUDUserService;
+import lv.alina.emailgen.service.IRegistrationVerificationService;
 
 @Route("register/confirm")
 @PageTitle("Confirm Register")
@@ -22,6 +23,7 @@ import lv.alina.emailgen.service.ICRUDUserService;
 public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterObserver{
 	
 	private final ICRUDUserService userService;
+	private final IRegistrationVerificationService verificationService;
 	
 	private String email;
 	private TextField verificationCodeField;
@@ -30,8 +32,9 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
     private Paragraph message;
     private Paragraph emailInfo;
     
-    public ConfirmRegisterView(ICRUDUserService userService) {
+    public ConfirmRegisterView(ICRUDUserService userService, IRegistrationVerificationService verificationService) {
         this.userService = userService;
+        this.verificationService = verificationService;
         buildLayout();
     }
     
@@ -150,8 +153,10 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
             return;
         }
 
-        if (!"123456".equals(code.trim())){
-            showError("Invalid verification code.");
+        boolean validCode = verificationService.isCodeValid(email, code);
+
+        if (!validCode) {
+            showError("Invalid or expired verification code.");
             return;
         }
 
@@ -172,6 +177,7 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
 
         try {
             userService.registerUser(email, password);
+            verificationService.removeCode(email);
             showSuccess("Account successfully created.");
 
             getUI().ifPresent(ui -> ui.navigate("login"));
