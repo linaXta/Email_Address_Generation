@@ -142,7 +142,8 @@ public class RegisterView extends VerticalLayout{
                 return;
             }
 
-            showSuccess("checkpoints, uraaaaaaaaa");
+            String normalizedEmail = normalize(email);
+            getUI().ifPresent(ui -> ui.navigate("register/confirm?email=" + normalizedEmail));
             
         } catch (Exception e) {
             showError(e.getMessage());
@@ -159,8 +160,8 @@ public class RegisterView extends VerticalLayout{
             currentValue = "";
         }
 
-        String normalizedCurrent = currentValue.trim().toLowerCase();
-        String normalizedOriginal = (alreadyRegisteredEmail == null ? "" : alreadyRegisteredEmail).trim().toLowerCase();
+        String normalizedCurrent = normalize(currentValue);
+        String normalizedOriginal = normalize(alreadyRegisteredEmail);
 
         if (!normalizedCurrent.equals(normalizedOriginal)) {
             alreadyRegisteredState = false;
@@ -220,6 +221,10 @@ public class RegisterView extends VerticalLayout{
         message.removeClassName("auth-message-error");
         message.removeClassName("auth-message-success");
         loginNowLink.setVisible(false);
+    }
+    
+    private String normalize(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
     }
 
 }
