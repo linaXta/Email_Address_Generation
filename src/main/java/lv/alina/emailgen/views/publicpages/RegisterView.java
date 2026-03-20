@@ -1,4 +1,4 @@
-package publicpages;
+package lv.alina.emailgen.views.publicpages;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -15,6 +15,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import lv.alina.emailgen.service.ICRUDUserService;
+import lv.alina.emailgen.service.IEmailService;
 import lv.alina.emailgen.service.IRegistrationVerificationService;
 
 @Route("register")
@@ -24,6 +25,7 @@ public class RegisterView extends VerticalLayout{
 	
 	private final ICRUDUserService userService;
 	private final IRegistrationVerificationService verificationService;
+	private final IEmailService emailService;
 
     private EmailField emailField;
     private Paragraph message;
@@ -33,9 +35,10 @@ public class RegisterView extends VerticalLayout{
     private boolean alreadyRegisteredState = false;
     private String alreadyRegisteredEmail;
 
-    public RegisterView(ICRUDUserService userService, IRegistrationVerificationService verificationService) {
+    public RegisterView(ICRUDUserService userService, IRegistrationVerificationService verificationService, IEmailService emailService) {
         this.userService = userService;
         this.verificationService = verificationService;
+        this.emailService = emailService;
         buildLayout();
     }
 
@@ -147,6 +150,7 @@ public class RegisterView extends VerticalLayout{
 
             String normalizedEmail = normalize(email);
             String code = verificationService.createAndStoreCode(normalizedEmail);
+            emailService.sendVerificationCode(normalizedEmail, code);
                        
             // TODO izdzeest
             System.out.println("Verification code for " + normalizedEmail + ": " + code);

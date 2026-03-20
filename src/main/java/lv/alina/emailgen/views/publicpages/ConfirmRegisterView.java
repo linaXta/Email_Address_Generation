@@ -1,4 +1,4 @@
-package publicpages;
+package lv.alina.emailgen.views.publicpages;
 
 
 import com.vaadin.flow.component.button.Button;
