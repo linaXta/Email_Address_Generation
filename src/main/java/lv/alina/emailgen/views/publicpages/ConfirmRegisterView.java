@@ -3,6 +3,7 @@ package lv.alina.emailgen.views.publicpages;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -17,6 +18,7 @@ import com.vaadin.flow.server.VaadinSession;
 
 import lv.alina.emailgen.models.User;
 import lv.alina.emailgen.service.ICRUDUserService;
+import lv.alina.emailgen.service.IEmailService;
 import lv.alina.emailgen.service.IRegistrationVerificationService;
 
 @Route("register/confirm")
@@ -26,6 +28,7 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
 	
 	private final ICRUDUserService userService;
 	private final IRegistrationVerificationService verificationService;
+	private final IEmailService emailService;
 	
 	private String email;
 	private TextField verificationCodeField;
@@ -34,9 +37,10 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
     private Paragraph message;
     private Paragraph emailInfo;
     
-    public ConfirmRegisterView(ICRUDUserService userService, IRegistrationVerificationService verificationService) {
+    public ConfirmRegisterView(ICRUDUserService userService, IRegistrationVerificationService verificationService, IEmailService emailService) {
         this.userService = userService;
         this.verificationService = verificationService;
+        this.emailService = emailService;
         buildLayout();
     }
     
@@ -49,6 +53,18 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
                 .trim().toLowerCase();
 
         if (email.isBlank()) {
+            event.forwardTo("register");
+            return;
+        }
+        
+        try {
+            boolean hasActiveCode = verificationService.hasActiveCode(email);
+
+            if (!hasActiveCode) {
+                event.forwardTo("register");
+                return;
+            }
+        } catch (Exception e) {
             event.forwardTo("register");
             return;
         }
@@ -105,8 +121,9 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
         verificationCodeField.setWidthFull();
         verificationCodeField.addClassName("auth-field");
 
-        Paragraph resendHint = new Paragraph("Send Code again in 0:59");
-        resendHint.addClassName("auth-link");
+        Button resendButton = new Button("Resend code");
+        resendButton.addClassName("auth-link");
+        resendButton.addClickListener(event -> handleResendCode());
 
         passwordField = new PasswordField("Password");
         passwordField.setPlaceholder("Create password");
@@ -127,7 +144,7 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
         createButton.addClickListener(event -> handleCreate());
 
         form.add(verificationCodeField,
-        		resendHint,
+        		resendButton,
                 passwordField,
                 confirmPasswordField,
                 message,
@@ -198,20 +215,37 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
         message.addClassName("auth-message-error");
         message.setVisible(true);
     }
-
-    // TODO IZDZEEST
-//    private void showSuccess(String text) {
-//        message.setText(text);
-//        message.removeClassName("auth-message-error");
-//        message.addClassName("auth-message-success");
-//        message.setVisible(true);
-//    }
+    
+    private void showSuccess(String text) { 
+    	message.setText(text); 
+    	message.removeClassName("auth-message-error"); 
+    	message.addClassName("auth-message-success"); 
+    	message.setVisible(true); 
+    }
 
     private void resetMessageState() {
         message.setVisible(false);
         message.setText("");
         message.removeClassName("auth-message-error");
         message.removeClassName("auth-message-success");
+    }
+    
+    private void handleResendCode() {
+        resetMessageState();
+
+        if (email == null || email.isBlank()) {
+            showError("E-mail is missing. Please return to register page.");
+            return;
+        }
+
+        try {
+            String newCode = verificationService.createAndStoreCode(email);
+            emailService.sendVerificationCode(email, newCode);
+
+            showSuccess("A new verification code was sent to " + email);
+        } catch (Exception e) {
+            showError(e.getMessage());
+        }
     }
 
 }

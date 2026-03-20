@@ -7,5 +7,7 @@ public interface IRegistrationVerificationService {
     boolean isCodeValid(String email, String code);
 
     void removeCode(String email) throws Exception;
+    
+    boolean hasActiveCode(String email) throws Exception;
 
 }

@@ -68,6 +68,28 @@ public class RegistrationVerificationServiceImpl implements IRegistrationVerific
 		}
     }
 	
+	@Override
+	public boolean hasActiveCode(String email) throws Exception {
+	    String normalizedEmail = normalaize(email);
+
+	    if (normalizedEmail.isBlank()) {
+	        return false;
+	    }
+
+	    VerificationCodeData data = verificationCodes.get(normalizedEmail);
+
+	    if (data == null) {
+	        return false;
+	    }
+
+	    if (data.getExpiresAt().isBefore(LocalDateTime.now())) {
+	        verificationCodes.remove(normalizedEmail);
+	        return false;
+	    }
+
+	    return true;
+	}
+	
 	private String normalaize(String value) {
 		return value == null ? "" : value.trim().toLowerCase();
 	}
