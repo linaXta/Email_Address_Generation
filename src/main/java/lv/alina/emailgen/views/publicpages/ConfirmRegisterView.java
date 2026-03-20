@@ -13,7 +13,9 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 
+import lv.alina.emailgen.models.User;
 import lv.alina.emailgen.service.ICRUDUserService;
 import lv.alina.emailgen.service.IRegistrationVerificationService;
 
@@ -48,6 +50,7 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
 
         if (email.isBlank()) {
             event.forwardTo("register");
+            return;
         }
         
         if (emailInfo != null) {
@@ -153,13 +156,6 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
             return;
         }
 
-        boolean validCode = verificationService.isCodeValid(email, code);
-
-        if (!validCode) {
-            showError("Invalid or expired verification code.");
-            return;
-        }
-
         if (password == null || password.isBlank()){
             showError("Password is required.");
             return;
@@ -176,11 +172,21 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
         }
 
         try {
-            userService.registerUser(email, password);
-            verificationService.removeCode(email);
-            showSuccess("Account successfully created.");
+        	boolean validCode = verificationService.isCodeValid(email, code);
+        	if (!validCode) {
+                showError("Invalid or expired verification code.");
+                return;
+            }
+        	
+        	userService.registerUser(email, password);
+        	User loggedInUser = userService.markUserLoggedIn(email);
+        	
+        	VaadinSession.getCurrent().setAttribute(User.class, loggedInUser);
+        	
+        	verificationService.removeCode(email);
 
-            getUI().ifPresent(ui -> ui.navigate("login"));
+        	getUI().ifPresent(ui -> ui.navigate("main"));
+
         } catch (Exception e) {
             showError(e.getMessage());
         }
@@ -193,12 +199,13 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
         message.setVisible(true);
     }
 
-    private void showSuccess(String text) {
-        message.setText(text);
-        message.removeClassName("auth-message-error");
-        message.addClassName("auth-message-success");
-        message.setVisible(true);
-    }
+    // TODO IZDZEEST
+//    private void showSuccess(String text) {
+//        message.setText(text);
+//        message.removeClassName("auth-message-error");
+//        message.addClassName("auth-message-success");
+//        message.setVisible(true);
+//    }
 
     private void resetMessageState() {
         message.setVisible(false);

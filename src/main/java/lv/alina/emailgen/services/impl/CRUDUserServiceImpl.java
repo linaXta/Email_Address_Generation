@@ -1,5 +1,6 @@
 package lv.alina.emailgen.services.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -101,6 +102,24 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
 
         String normalizedEmail = email.trim().toLowerCase();
         return userRepo.existsByEmail(normalizedEmail);
+    }
+    
+    @Override
+    public User markUserLoggedIn(String email) throws Exception {
+        if (email == null || email.isBlank()) {
+            throw new Exception("E-mail is required.");
+        }
+
+        String normalizedEmail = email.trim().toLowerCase();
+
+        User user = userRepo.findByEmail(normalizedEmail);
+        if (user == null) {
+            throw new Exception("User not found.");
+        }
+
+        user.setLastLoginAt(LocalDateTime.now());
+
+        return userRepo.save(user);
     }
 
 }
