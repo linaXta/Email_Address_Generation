@@ -76,7 +76,7 @@ public class RegistrationVerificationServiceImpl implements IRegistrationVerific
 	        return false;
 	    }
 
-	    VerificationCodeData data = verificationCodes.get(normalizedEmail);
+	    VerificationCodeData data = verificationCodes.get(normalizedEmail); // "test@mail.com" → { code: "123456", expiresAt: 12:30 }
 
 	    if (data == null) {
 	        return false;
