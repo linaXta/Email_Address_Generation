@@ -15,6 +15,8 @@ public class RegistrationVerificationServiceImpl implements IRegistrationVerific
 	
 	private static final int CODE_LENGHT = 6;
 	private static final int EXPIRATION_IN_MINUTES = 10;
+	private static final int RESEND_COOLDOWN_SECONDS = 120;
+
 	
 	private final Map<String, VerificationCodeData> verificationCodes = new ConcurrentHashMap<>();
 	private final Random random = new Random();
@@ -28,9 +30,10 @@ public class RegistrationVerificationServiceImpl implements IRegistrationVerific
 		}
 		
 		String code = generateVerificationCode();
+		LocalDateTime now = LocalDateTime.now();
 		LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(EXPIRATION_IN_MINUTES);
 		
-		verificationCodes.put(normalaizedEmail, new VerificationCodeData(code, expiresAt));
+		verificationCodes.put(normalaizedEmail, new VerificationCodeData(code, expiresAt, now));
 		
 		return code;
 	}
@@ -88,6 +91,29 @@ public class RegistrationVerificationServiceImpl implements IRegistrationVerific
 	    }
 
 	    return true;
+	}
+	
+	@Override
+	public boolean canResendCode(String email) throws Exception {
+	    String normalizedEmail = normalaize(email);
+
+	    if (normalizedEmail.isBlank()) {
+	        return false;
+	    }
+
+	    VerificationCodeData data = verificationCodes.get(normalizedEmail);
+
+	    if (data == null) {
+	        return true; // nav koda tad drīkst sūtīt
+	    }
+
+	    LocalDateTime lastSent = data.getLastSentAt();
+
+	    if (lastSent == null) {
+	        return true;
+	    }
+
+	    return lastSent.plusSeconds(RESEND_COOLDOWN_SECONDS).isBefore(LocalDateTime.now());
 	}
 	
 	private String normalaize(String value) {

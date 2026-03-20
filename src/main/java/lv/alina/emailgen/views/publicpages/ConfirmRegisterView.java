@@ -3,7 +3,6 @@ package lv.alina.emailgen.views.publicpages;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -239,6 +238,13 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
         }
 
         try {
+        	boolean canResend = verificationService.canResendCode(email);
+        	
+        	if (!canResend) {
+                showError("Please wait before requesting a new code.");
+                return;
+            }        	
+
             String newCode = verificationService.createAndStoreCode(email);
             emailService.sendVerificationCode(email, newCode);
 

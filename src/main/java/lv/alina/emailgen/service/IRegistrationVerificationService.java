@@ -9,5 +9,7 @@ public interface IRegistrationVerificationService {
     void removeCode(String email) throws Exception;
     
     boolean hasActiveCode(String email) throws Exception;
+    
+    boolean canResendCode(String email) throws Exception;
 
 }
