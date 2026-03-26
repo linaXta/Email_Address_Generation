@@ -31,7 +31,7 @@ public class RegistrationVerificationServiceImpl implements IRegistrationVerific
 		
 		String code = generateVerificationCode();
 		LocalDateTime now = LocalDateTime.now();
-		LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(EXPIRATION_IN_MINUTES);
+		LocalDateTime expiresAt = now.plusMinutes(EXPIRATION_IN_MINUTES);
 		
 		verificationCodes.put(normalaizedEmail, new VerificationCodeData(code, expiresAt, now));
 		
