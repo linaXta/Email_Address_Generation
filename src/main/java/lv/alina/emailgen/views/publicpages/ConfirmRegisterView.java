@@ -15,6 +15,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.Registration;
 
 import lv.alina.emailgen.models.User;
 import lv.alina.emailgen.models.enums.VerificationCodeStatus;
@@ -38,6 +39,8 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
     private Paragraph message;
     private Paragraph emailInfo;
     private Button resendButton;
+    private long resendButtonEndTime;
+    private Registration resendCountdownListener;
     
     public ConfirmRegisterView(ICRUDUserService userService, IRegistrationVerificationService verificationService, IEmailService emailService) {
         this.userService = userService;
@@ -68,8 +71,11 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
             }
             
             int secondsLeft = verificationService.getRemainingResendCooldownSeconds(email);
-            if (secondsLeft > 0 && resendButton != null) {
+            if (secondsLeft > 0) {
                 startResendCountdown(secondsLeft);
+            }else {
+            	resendButton.setText("Resend code");
+            	resendButton.setEnabled(true);
             }
             
         } catch (Exception e) {
@@ -79,10 +85,6 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
         
         if (emailInfo != null) {
             emailInfo.setText("A confirmation code was sent to " + email);
-        }
-        
-        if (resendButton != null) {
-            startResendCountdown(verificationService.getResendCooldownSeconds());
         }
     }
     
@@ -286,30 +288,44 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
     }
     
     private void startResendCountdown(int seconds) {
-        UI ui = UI.getCurrent();
+        UI currentUi = UI.getCurrent();
+
+        resendButtonEndTime = System.currentTimeMillis() + seconds * 1000L;
 
         resendButton.setEnabled(false);
 
-        final int[] timeLeft = {seconds};
+        if (resendCountdownListener != null) {
+            resendCountdownListener.remove();
+            resendCountdownListener = null;
+        }
 
-        ui.setPollInterval(1000);
+        currentUi.setPollInterval(1000);
 
-        ui.addPollListener(event -> {
-            if (timeLeft[0] > 0) {
-                int minutes = timeLeft[0] / 60;
-                int secs = timeLeft[0] % 60;
+        resendCountdownListener = currentUi.addPollListener(event -> {
+            long currentTime = System.currentTimeMillis();
+            long millisecondsLeft = resendButtonEndTime - currentTime;
 
-                String formattedTime = String.format("%02d:%02d", minutes, secs);
-
-                resendButton.setText("Resend code in " + formattedTime);
-
-                timeLeft[0]--;
-            } else {
+            if (millisecondsLeft <= 0) {
                 resendButton.setText("Resend code");
                 resendButton.setEnabled(true);
 
-                ui.setPollInterval(-1);
+                currentUi.setPollInterval(-1);
+
+                if (resendCountdownListener != null) {
+                    resendCountdownListener.remove();
+                    resendCountdownListener = null;
+                }
+
+                return;
             }
+
+            long secondsLeft = (long) Math.ceil(millisecondsLeft / 1000.0);
+            long minutesLeft = secondsLeft / 60;
+            long remainingSeconds = secondsLeft % 60;
+
+            String timeText = String.format("%02d:%02d", minutesLeft, remainingSeconds);
+
+            resendButton.setText("Resend code in " + timeText);
         });
     }
 

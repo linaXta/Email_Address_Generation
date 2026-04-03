@@ -40,28 +40,28 @@ public class RegistrationVerificationServiceImpl implements IRegistrationVerific
 	}
 	
 
-	@Override
-    public boolean isCodeValid(String email, String code) {
-    	String normalaizedEmail = normalaize(email);
-    	String normalizedCode = code == null ? "" : code.trim();
-    	
-    	if (normalaizedEmail.isBlank() || normalizedCode.isBlank()) {
-    		return false;
-    	}
-    	
-    	VerificationCodeData storedDate = verificationCodes.get(normalaizedEmail);
-    	
-    	if (storedDate == null) {
-    		return false;
-    	}
-    	
-    	if (storedDate.getExpiresAt().isBefore(LocalDateTime.now())) {
-    		verificationCodes.remove(normalaizedEmail);
-    		return false;
-    	}
-    	
-    	return storedDate.getCode().equals(normalizedCode);
-    }
+//	@Override
+//    public boolean isCodeValid(String email, String code) {
+//    	String normalaizedEmail = normalaize(email);
+//    	String normalizedCode = code == null ? "" : code.trim();
+//    	
+//    	if (normalaizedEmail.isBlank() || normalizedCode.isBlank()) {
+//    		return false;
+//    	}
+//    	
+//    	VerificationCodeData storedDate = verificationCodes.get(normalaizedEmail);
+//    	
+//    	if (storedDate == null) {
+//    		return false;
+//    	}
+//    	
+//    	if (storedDate.getExpiresAt().isBefore(LocalDateTime.now())) {
+//    		verificationCodes.remove(normalaizedEmail);
+//    		return false;
+//    	}
+//    	
+//    	return storedDate.getCode().equals(normalizedCode);
+//    }
 
 	@Override
     public void removeCode(String email) throws Exception{
@@ -156,23 +156,35 @@ public class RegistrationVerificationServiceImpl implements IRegistrationVerific
 	}
 	
 	@Override
-	public int getRemainingResendCooldownSeconds(String email) {
+	public int getRemainingResendCooldownSeconds(String email) throws Exception {
 	    String normalizedEmail = normalaize(email);
+	    
+	    if(normalizedEmail.isBlank()) {
+	    	return 0;
+	    }
 
 	    VerificationCodeData data = verificationCodes.get(normalizedEmail);
 
-	    if (data == null || data.getLastSentAt() == null) {
+	    if (data == null) {
+	        return 0;
+	    }
+	    
+	    LocalDateTime lastSentTime = data.getLastSentAt();
+	    
+	    if (lastSentTime == null) {
 	        return 0;
 	    }
 
-	    LocalDateTime nextAllowedTime = data.getLastSentAt().plusSeconds(RESEND_COOLDOWN_SECONDS);
+	    LocalDateTime nextAllowedTime = lastSentTime.plusSeconds(RESEND_COOLDOWN_SECONDS);
 	    LocalDateTime now = LocalDateTime.now();
 
 	    if (now.isAfter(nextAllowedTime)) {
 	        return 0;
 	    }
+	    
+	    long remainingSeconds = java.time.Duration.between(now, nextAllowedTime).getSeconds();
 
-	    return (int) java.time.Duration.between(now, nextAllowedTime).getSeconds();
+	    return (int) remainingSeconds;
 	}
 		
 	private String normalaize(String value) {
