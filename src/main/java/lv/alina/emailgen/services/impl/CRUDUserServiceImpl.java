@@ -150,5 +150,29 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
 
         return userRepo.save(user);
     }
+    
+    @Override
+    public void updatePasswordByEmail(String email, String newRawPassword) throws Exception {
+        if (email == null || email.isBlank()) {
+            throw new Exception("E-mail is required");
+        }
+
+        if (newRawPassword == null || newRawPassword.isBlank()) {
+            throw new Exception("Password is required");
+        }
+
+        String normalizedEmail = email.trim().toLowerCase() ;
+
+        User user = userRepo.findByEmail(normalizedEmail);
+
+        if (user == null) {
+            throw new Exception("User with this e-mail was not found");
+        }
+
+        String passwordHash = passwordEncoder.encode(newRawPassword);
+        user.setPasswordHash(passwordHash);
+
+        userRepo.save(user);
+    }
 
 }

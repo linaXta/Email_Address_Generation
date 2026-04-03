@@ -15,5 +15,7 @@ public interface ICRUDUserService extends ICRUDBase<User>{
     User markUserLoggedIn(String email) throws Exception;
     
     User loginUser(String email, String rawPassword) throws Exception;
+    
+    void updatePasswordByEmail(String email, String newRawPassword) throws Exception;
 
 }

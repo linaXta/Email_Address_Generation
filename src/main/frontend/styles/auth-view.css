@@ -220,6 +220,19 @@
     padding: 0 24px;
 }
 
+.auth-forgot-row {
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin: 6px 0 14px 0;
+}
+
+.auth-forgot-text {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,

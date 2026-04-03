@@ -99,8 +99,18 @@ public class LoginView extends VerticalLayout{
         Paragraph forgotText = new Paragraph("Forgot password?");
         forgotText.addClassName("auth-forgot-text");
 
-        Anchor forgotLink = new Anchor("#", "Click here");
+        Button forgotLink = new Button("Click here");
         forgotLink.addClassName("auth-link");
+        forgotLink.addClickListener(event -> {
+            String enteredEmail = emailField.getValue();
+
+            if (enteredEmail == null || enteredEmail.isBlank()) {
+                getUI().ifPresent(ui -> ui.navigate("forgot-password"));
+            } else {
+                String normalizedEmail = enteredEmail.trim().toLowerCase();
+                getUI().ifPresent(ui -> ui.navigate("forgot-password?email=" + normalizedEmail));
+            }
+        });
 
         forgotPasswordRow.add(forgotText, forgotLink);
 
