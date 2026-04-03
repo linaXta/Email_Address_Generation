@@ -121,5 +121,34 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
 
         return userRepo.save(user);
     }
+    
+    @Override
+    public User loginUser(String email, String rawPassword) throws Exception {
+        if (email == null || email.isBlank()) {
+            throw new Exception("E-mail is needed");
+        }
+
+        if (rawPassword == null || rawPassword.isBlank()) {
+            throw new Exception("Password is needed");
+        }
+
+        String normalizedEmail = email.trim().toLowerCase();
+
+        User user = userRepo.findByEmail(normalizedEmail);
+
+        if (user == null) {
+            throw new Exception("Incorrect e-mail or password");
+        }
+
+        boolean passwordMatches = passwordEncoder.matches(rawPassword, user.getPasswordHash());
+
+        if (!passwordMatches) {
+            throw new Exception("Incorrect e-mail or password");
+        }
+
+        user.setLastLoginAt(java.time.LocalDateTime.now());
+
+        return userRepo.save(user);
+    }
 
 }

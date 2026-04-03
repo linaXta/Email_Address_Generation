@@ -58,10 +58,9 @@ public class MainView extends VerticalLayout implements BeforeEnterObserver {
                 Notification.show("Profile page will be added later.")
         );
 
-        // TODO parlikt uz login
         logoutButton.addClickListener(event -> {
             VaadinSession.getCurrent().setAttribute(User.class, null);
-            getUI().ifPresent(ui -> ui.navigate("register"));
+            getUI().ifPresent(ui -> ui.navigate("login"));
         });
 
         shell.add(
@@ -76,16 +75,14 @@ public class MainView extends VerticalLayout implements BeforeEnterObserver {
         add(shell);
     }
 	
-	// TODO nomainīt pārvirzi uz login
 	@Override
     public void beforeEnter(BeforeEnterEvent event) {
         User loggedInUser = VaadinSession.getCurrent().getAttribute(User.class);
 
         if (loggedInUser == null) {
-            event.forwardTo("register");
+            event.forwardTo("login");
         }
     }
-
 
     private Button createMenuButton(String text) {
         Button button = new Button(text);
