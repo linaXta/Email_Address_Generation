@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
 
 import lv.alina.emailgen.models.VerificationCodeData;
+import lv.alina.emailgen.models.enums.VerificationCodeStatus;
 import lv.alina.emailgen.service.IRegistrationVerificationService;
 
 @Service
@@ -79,7 +80,7 @@ public class RegistrationVerificationServiceImpl implements IRegistrationVerific
 	        return false;
 	    }
 
-	    VerificationCodeData data = verificationCodes.get(normalizedEmail); // "test@mail.com" → { code: "123456", expiresAt: 12:30 }
+	    VerificationCodeData data = verificationCodes.get(normalizedEmail);
 
 	    if (data == null) {
 	        return false;
@@ -104,7 +105,7 @@ public class RegistrationVerificationServiceImpl implements IRegistrationVerific
 	    VerificationCodeData data = verificationCodes.get(normalizedEmail);
 
 	    if (data == null) {
-	        return true; // nav koda tad drīkst sūtīt
+	        return true;
 	    }
 
 	    LocalDateTime lastSent = data.getLastSentAt();
@@ -116,6 +117,64 @@ public class RegistrationVerificationServiceImpl implements IRegistrationVerific
 	    return lastSent.plusSeconds(RESEND_COOLDOWN_SECONDS).isBefore(LocalDateTime.now());
 	}
 	
+	@Override
+	public VerificationCodeStatus getCodeStatus(String email, String code) throws Exception {
+	    String normalizedEmail = normalaize(email);
+	    String normalizedCode; 
+	    
+	    if (code == null) {
+	        normalizedCode = "";
+	    } else {
+	        normalizedCode = code.trim();
+	    }
+
+	    if (normalizedEmail.isBlank() || normalizedCode.isBlank()) {
+	        return VerificationCodeStatus.INVALID;
+	    }
+
+	    VerificationCodeData storedData = verificationCodes.get(normalizedEmail);
+
+	    if (storedData == null) {
+	        return VerificationCodeStatus.NOT_FOUND;
+	    }
+
+	    if (storedData.getExpiresAt().isBefore(LocalDateTime.now())) {
+	        verificationCodes.remove(normalizedEmail);
+	        return VerificationCodeStatus.EXPIRED;
+	    }
+
+	    if (!storedData.getCode().equals(normalizedCode)) {
+	        return VerificationCodeStatus.INVALID;
+	    }
+
+	    return VerificationCodeStatus.VALID;
+	}
+	
+	@Override
+	public int getResendCooldownSeconds() {
+	    return RESEND_COOLDOWN_SECONDS;
+	}
+	
+	@Override
+	public int getRemainingResendCooldownSeconds(String email) {
+	    String normalizedEmail = normalaize(email);
+
+	    VerificationCodeData data = verificationCodes.get(normalizedEmail);
+
+	    if (data == null || data.getLastSentAt() == null) {
+	        return 0;
+	    }
+
+	    LocalDateTime nextAllowedTime = data.getLastSentAt().plusSeconds(RESEND_COOLDOWN_SECONDS);
+	    LocalDateTime now = LocalDateTime.now();
+
+	    if (now.isAfter(nextAllowedTime)) {
+	        return 0;
+	    }
+
+	    return (int) java.time.Duration.between(now, nextAllowedTime).getSeconds();
+	}
+		
 	private String normalaize(String value) {
 		return value == null ? "" : value.trim().toLowerCase();
 	}

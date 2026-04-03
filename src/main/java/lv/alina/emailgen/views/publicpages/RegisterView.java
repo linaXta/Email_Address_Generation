@@ -151,9 +151,6 @@ public class RegisterView extends VerticalLayout{
             String normalizedEmail = normalize(email);
             String code = verificationService.createAndStoreCode(normalizedEmail);
             emailService.sendVerificationCode(normalizedEmail, code);
-                       
-            // TODO izdzeest
-            System.out.println("Verification code for " + normalizedEmail + ": " + code);
 
             getUI().ifPresent(ui -> ui.navigate("register/confirm?email=" + normalizedEmail));
             
@@ -219,13 +216,13 @@ public class RegisterView extends VerticalLayout{
         message.addClassName("auth-message-error");
         message.setVisible(true);
     }
-
-    private void showSuccess(String text) {
-        message.setText(text);
-        message.removeClassName("auth-message-error");
-        message.addClassName("auth-message-success");
-        message.setVisible(true);
-    }
+//
+//    private void showSuccess(String text) {
+//        message.setText(text);
+//        message.removeClassName("auth-message-error");
+//        message.addClassName("auth-message-success");
+//        message.setVisible(true);
+//    }
 
     private void resetMessageState() {
         message.setVisible(false);

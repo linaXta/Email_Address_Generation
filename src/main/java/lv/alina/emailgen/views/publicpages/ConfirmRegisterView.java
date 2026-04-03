@@ -1,6 +1,7 @@
 package lv.alina.emailgen.views.publicpages;
 
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H2;
@@ -16,6 +17,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 
 import lv.alina.emailgen.models.User;
+import lv.alina.emailgen.models.enums.VerificationCodeStatus;
 import lv.alina.emailgen.service.ICRUDUserService;
 import lv.alina.emailgen.service.IEmailService;
 import lv.alina.emailgen.service.IRegistrationVerificationService;
@@ -35,6 +37,7 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
     private PasswordField confirmPasswordField;
     private Paragraph message;
     private Paragraph emailInfo;
+    private Button resendButton;
     
     public ConfirmRegisterView(ICRUDUserService userService, IRegistrationVerificationService verificationService, IEmailService emailService) {
         this.userService = userService;
@@ -63,6 +66,12 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
                 event.forwardTo("register");
                 return;
             }
+            
+            int secondsLeft = verificationService.getRemainingResendCooldownSeconds(email);
+            if (secondsLeft > 0 && resendButton != null) {
+                startResendCountdown(secondsLeft);
+            }
+            
         } catch (Exception e) {
             event.forwardTo("register");
             return;
@@ -70,6 +79,10 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
         
         if (emailInfo != null) {
             emailInfo.setText("A confirmation code was sent to " + email);
+        }
+        
+        if (resendButton != null) {
+            startResendCountdown(verificationService.getResendCooldownSeconds());
         }
     }
     
@@ -120,7 +133,7 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
         verificationCodeField.setWidthFull();
         verificationCodeField.addClassName("auth-field");
 
-        Button resendButton = new Button("Resend code");
+        resendButton = new Button("Resend code");
         resendButton.addClassName("auth-link");
         resendButton.addClickListener(event -> handleResendCode());
 
@@ -188,11 +201,24 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
         }
 
         try {
-        	boolean validCode = verificationService.isCodeValid(email, code);
-        	if (!validCode) {
-                showError("Invalid or expired verification code.");
-                return;
-            }
+        	
+        	VerificationCodeStatus codeStatus = verificationService.getCodeStatus(email, code);
+        	
+        	if (codeStatus == VerificationCodeStatus.INVALID ) {
+        		showError("Verification code is incorrect.");
+        		return;
+        	}
+        	
+        	if (codeStatus == VerificationCodeStatus.EXPIRED ) {
+        		showError("Verification code has expired.");
+        		return;
+        	}
+        	
+        	
+        	if (codeStatus == VerificationCodeStatus.NOT_FOUND ) {
+        		showError("This e-mail has no active verification code.");
+        		return;
+        	}
         	
         	userService.registerUser(email, password);
         	User loggedInUser = userService.markUserLoggedIn(email);
@@ -247,11 +273,44 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
 
             String newCode = verificationService.createAndStoreCode(email);
             emailService.sendVerificationCode(email, newCode);
+            
+            verificationCodeField.clear();
 
             showSuccess("A new verification code was sent to " + email);
+            
+            startResendCountdown(verificationService.getResendCooldownSeconds());
+            
         } catch (Exception e) {
             showError(e.getMessage());
         }
+    }
+    
+    private void startResendCountdown(int seconds) {
+        UI ui = UI.getCurrent();
+
+        resendButton.setEnabled(false);
+
+        final int[] timeLeft = {seconds};
+
+        ui.setPollInterval(1000);
+
+        ui.addPollListener(event -> {
+            if (timeLeft[0] > 0) {
+                int minutes = timeLeft[0] / 60;
+                int secs = timeLeft[0] % 60;
+
+                String formattedTime = String.format("%02d:%02d", minutes, secs);
+
+                resendButton.setText("Resend code in " + formattedTime);
+
+                timeLeft[0]--;
+            } else {
+                resendButton.setText("Resend code");
+                resendButton.setEnabled(true);
+
+                ui.setPollInterval(-1);
+            }
+        });
     }
 
 }

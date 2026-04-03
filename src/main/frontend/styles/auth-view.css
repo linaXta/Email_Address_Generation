@@ -159,20 +159,37 @@
 }
 
 .auth-message-error {
-    color: #c62828;
+    color: #d94a38;
 }
 
 .auth-message-success {
-    color: #2e7d32;
+    color: #2f7d4a;
 }
 
 .auth-link {
-    color: #4d84ff;
-    font-size: 13px;
-    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 500;
     text-align: center;
     cursor: pointer;
-    margin-top: 4px;
+    align-self: center;
+}
+
+.auth-link:hover {
+    color: #1f2937;
+    text-decoration: underline;
+}
+
+.auth-primary-btn {
+    min-width: 195px;
+    align-self: center;
+}
+
+.auth-link:disabled {
+    color: #9ca3af;
 }
 
 .auth-primary-btn {
