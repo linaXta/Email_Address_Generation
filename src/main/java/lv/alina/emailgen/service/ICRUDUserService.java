@@ -1,6 +1,7 @@
 package lv.alina.emailgen.service;
 
 import lv.alina.emailgen.models.User;
+import lv.alina.emailgen.repos.IMainEmailRepo;
 
 public interface ICRUDUserService extends ICRUDBase<User>{
     

@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import lv.alina.emailgen.models.MainEmail;
 import lv.alina.emailgen.models.User;
+import lv.alina.emailgen.repos.IMainEmailRepo;
 import lv.alina.emailgen.repos.IUserRepo;
 import lv.alina.emailgen.service.ICRUDUserService;
 
@@ -14,10 +16,13 @@ import lv.alina.emailgen.service.ICRUDUserService;
 public class CRUDUserServiceImpl implements ICRUDUserService{
 	
 	private final IUserRepo userRepo;
+	private final IMainEmailRepo mainEmailRepo;
 	private final PasswordEncoder passwordEncoder;
 	
-	public CRUDUserServiceImpl(IUserRepo userRepo,PasswordEncoder passwordEncoder) {
+	
+	public CRUDUserServiceImpl(IUserRepo userRepo, IMainEmailRepo mainEmailRepo, PasswordEncoder passwordEncoder) {
         this.userRepo = userRepo;
+        this.mainEmailRepo = mainEmailRepo;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -64,7 +69,12 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
     		throw new Exception("Password is needed");
     	}
     	
-    	String normalizedEmail = email.trim().toLowerCase();
+    	String originalEmail = email.trim();
+    	String normalizedEmail = originalEmail.toLowerCase();
+    	
+    	if (!isEmailFormatValid(originalEmail)) {
+            throw new Exception("Please enter a valid e-mail address.");
+        }
     	
     	if (userRepo.existsByEmail(normalizedEmail)) {
             throw new Exception("User with this email already exists");
@@ -78,7 +88,15 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
         user.setFullName(null);
         user.setMfaEnabled(false);
         
-        return userRepo.save(user);
+        User savedUser = userRepo.save(user);
+        
+        MainEmail firstMainEmail = new MainEmail();
+        firstMainEmail.setUser(savedUser);
+        firstMainEmail.setMainEmail(originalEmail);
+
+        mainEmailRepo.save(firstMainEmail);
+
+        return savedUser;
     	
     }
 
@@ -173,6 +191,16 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
         user.setPasswordHash(passwordHash);
 
         userRepo.save(user);
+    }
+    
+    private boolean isEmailFormatValid(String email) {
+        if (email == null || email.isBlank()) {
+            return false;
+        }
+
+        String value = email.trim();
+
+        return value.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     }
 
 }
