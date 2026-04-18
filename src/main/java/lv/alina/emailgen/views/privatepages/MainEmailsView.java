@@ -92,8 +92,8 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
         tableHeaderBar.setAlignItems(Alignment.CENTER);
 
         sortBox = new ComboBox<>();
-        sortBox.setItems("Oldest first", "A-Z", "Z-A");
-        sortBox.setValue("Oldest first");
+        sortBox.setItems("OLDEST FIRST", "NEWEST FIRST", "A-Z", "Z-A");
+        sortBox.setValue("OLDEST FIRST");
         sortBox.setPlaceholder("Sort");
         sortBox.addClassName("main-emails-sort-box");
         sortBox.addValueChangeListener(event -> {
@@ -126,9 +126,8 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
         HorizontalLayout rightSide = new HorizontalLayout(pageInfo, previousPageButton, nextPageButton);
         rightSide.addClassName("main-emails-right-side");
         rightSide.setAlignItems(Alignment.CENTER);
-
+        
         tableHeaderBar.add(sortBox, rightSide);
-        tableHeaderBar.expand(sortBox);
 
         tableContent = new VerticalLayout();
         tableContent.addClassName("main-emails-table-content");
@@ -143,7 +142,6 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
     private void refreshTable() {
         User loggedInUser = VaadinSession.getCurrent().getAttribute(User.class);
         if (loggedInUser == null) {
-            getUI().ifPresent(ui -> ui.navigate("register"));
             return;
         }
 
@@ -166,6 +164,8 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
             mainEmails.sort(Comparator.comparing(MainEmail::getMainEmail, String.CASE_INSENSITIVE_ORDER));
         } else if ("Z-A".equals(selectedSort)) {
             mainEmails.sort(Comparator.comparing(MainEmail::getMainEmail, String.CASE_INSENSITIVE_ORDER).reversed());
+        } else if ("NEWEST FIRST".equals(selectedSort)) {
+            mainEmails.sort(Comparator.comparing(MainEmail::getCreatedAt).reversed());
         } else {
             mainEmails.sort(Comparator.comparing(MainEmail::getCreatedAt));
         }

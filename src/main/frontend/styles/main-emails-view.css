@@ -85,18 +85,32 @@
     border-bottom: none;
     padding: 14px 18px;
     box-sizing: border-box;
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
+
+..main-emails-right-side {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-left: auto;
+}
+
+.main-emails-page-info {
+    color: #7b7b7b;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
 
 .main-emails-sort-box {
     max-width: 220px;
 }
 
-.main-emails-right-side {
-    gap: 14px;
-}
-
-.main-emails-page-info {
-    color: #7b7b7b;
+.main-emails-sort-box::part(input-field) {
+    text-transform: uppercase;
     font-weight: 700;
 }
 
