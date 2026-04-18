@@ -1,11 +1,19 @@
 package lv.alina.emailgen.views.privatepages;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -17,6 +25,8 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 
 import lv.alina.emailgen.models.MainEmail;
 import lv.alina.emailgen.models.User;
@@ -40,6 +50,8 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
     private Button previousPageButton;
     private Button nextPageButton;
     private VerticalLayout tableContent;
+    
+    private Anchor exportLink;
 
     public MainEmailsView(ICRUDMainEmailService mainEmailService) {
         this.mainEmailService = mainEmailService;
@@ -100,6 +112,13 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
             currentPage = 1;
             refreshTable();
         });
+        
+        Button exportButton = new Button("EXPORT");
+        exportButton.addClassName("main-emails-export-button");
+
+        exportLink = new Anchor(createDownloadHandler(), "");
+        exportLink.addClassName("main-emails-export-link");
+        exportLink.add(exportButton);
 
         pageInfo = new Span("0 - 0 FROM 0");
         pageInfo.addClassName("main-emails-page-info");
@@ -123,11 +142,15 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
             }
         });
 
+        HorizontalLayout leftSide = new HorizontalLayout(sortBox, exportLink);
+        leftSide.addClassName("main-emails-left-side");
+        leftSide.setAlignItems(Alignment.CENTER);
+
         HorizontalLayout rightSide = new HorizontalLayout(pageInfo, previousPageButton, nextPageButton);
         rightSide.addClassName("main-emails-right-side");
         rightSide.setAlignItems(Alignment.CENTER);
-        
-        tableHeaderBar.add(sortBox, rightSide);
+
+        tableHeaderBar.add(leftSide, rightSide);
 
         tableContent = new VerticalLayout();
         tableContent.addClassName("main-emails-table-content");
@@ -151,11 +174,13 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
             updateTableRows();
             updatePaginationInfo();
             updatePaginationButtons();
+
         } catch (Exception e) {
             tableContent.removeAll();
             tableContent.add(new Span("Error: " + e.getMessage()));
         }
     }
+    
 
     private void sortMainEmails(ArrayList<MainEmail> mainEmails) {
         String selectedSort = sortBox.getValue();
@@ -261,6 +286,36 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
 
         if (loggedInUser == null) {
             event.forwardTo("login");
+        }
+    }
+    
+    private DownloadHandler createDownloadHandler() {
+    	return DownloadHandler.fromInputStream(event ->
+    		new DownloadResponse(createExcelFile(),"main-emails.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", -1)
+		);
+    }
+    
+    private ByteArrayInputStream createExcelFile() {
+        try (XSSFWorkbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+            Sheet sheet = workbook.createSheet("Main Emails");
+
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("E-mail");
+
+            for (int i = 0; i < allFilteredMainEmails.size(); i++) {
+                Row row = sheet.createRow(i + 1);
+                row.createCell(0).setCellValue(allFilteredMainEmails.get(i).getMainEmail());
+            }
+
+            sheet.autoSizeColumn(0);
+
+            workbook.write(out);
+            return new ByteArrayInputStream(out.toByteArray());
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to generate Excel file", e);
         }
     }
 

@@ -98,6 +98,34 @@
     margin-left: auto;
 }
 
+.main-emails-left-side {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.main-emails-export-link {
+    text-decoration: none;
+}
+
+.main-emails-export-button {
+    background: #efc690;
+    color: #1f1f1f;
+    border: 3px solid #2b2b2b;
+    border-radius: 18px;
+    font-weight: 800;
+    font-size: 16px;
+    text-transform: uppercase;
+    height: 44px;
+    padding: 0 20px;
+    box-shadow: none;
+    cursor: pointer;
+}
+
+.main-emails-export-button:hover {
+    background: #e8bb7e;
+}
+
 .main-emails-page-info {
     color: #7b7b7b;
     font-weight: 700;
