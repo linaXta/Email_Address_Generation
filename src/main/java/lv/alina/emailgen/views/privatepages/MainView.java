@@ -43,8 +43,8 @@ public class MainView extends VerticalLayout implements BeforeEnterObserver {
         Button logoutButton = createMenuButton("Log out");
 
         mainEmailsButton.addClickListener(event ->
-                Notification.show("Main e-mails page will be added later.")
-        );
+        	getUI().ifPresent(ui -> ui.navigate("main-emails"))
+		);
 
         companiesButton.addClickListener(event ->
                 Notification.show("Company's page will be added later.")
