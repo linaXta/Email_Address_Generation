@@ -232,15 +232,11 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
             HorizontalLayout actionButtons = new HorizontalLayout();
             actionButtons.addClassName("main-emails-actions");
 
-            Button historyButton = new Button("HISTORY");
-            Button editButton = new Button("EDIT");
-            Button copyButton = new Button("COPY");
-            Button deleteButton = new Button("DELETE");
+            Button historyButton = createActionButton("HISTORY", VaadinIcon.FILE_TEXT_O);
+            Button editButton = createActionButton("EDIT", VaadinIcon.EDIT);
+            Button copyButton = createActionButton("COPY", VaadinIcon.COPY_O);
+            Button deleteButton = createActionButton("DELETE", VaadinIcon.TRASH);
 
-            historyButton.addClassName("main-emails-action-button");
-            editButton.addClassName("main-emails-action-button");
-            copyButton.addClassName("main-emails-action-button");
-            deleteButton.addClassName("main-emails-action-button");
 
             actionButtons.add(historyButton, editButton, copyButton, deleteButton);
 
@@ -317,6 +313,24 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
         } catch (IOException e) {
             throw new RuntimeException("Failed to generate Excel file", e);
         }
+    }
+    
+    private Button createActionButton(String text, VaadinIcon iconType) {
+        Icon icon = iconType.create();
+        icon.addClassName("main-emails-action-icon");
+
+        Span label = new Span(text);
+        label.addClassName("main-emails-action-label");
+
+        VerticalLayout content = new VerticalLayout(icon, label);
+        content.addClassName("main-emails-action-content");
+        content.setPadding(false);
+        content.setSpacing(false);
+        content.setAlignItems(Alignment.CENTER);
+
+        Button button = new Button(content);
+        button.addClassName("main-emails-action-button");
+        return button;
     }
 
 }
