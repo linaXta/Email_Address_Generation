@@ -17,6 +17,7 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -237,6 +238,9 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
             Button copyButton = createActionButton("COPY", VaadinIcon.COPY_O);
             Button deleteButton = createActionButton("DELETE", VaadinIcon.TRASH);
 
+            copyButton.addClickListener(event -> { getUI().ifPresent(ui -> ui.getPage().executeJs("navigator.clipboard.writeText($0)", mainEmail.getMainEmail() ));
+                Notification.show("E-mail copied");
+            });
 
             actionButtons.add(historyButton, editButton, copyButton, deleteButton);
 
