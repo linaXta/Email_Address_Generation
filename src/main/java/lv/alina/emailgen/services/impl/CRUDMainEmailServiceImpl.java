@@ -82,5 +82,15 @@ public class CRUDMainEmailServiceImpl implements ICRUDMainEmailService{
 
         return filteredMainEmails;
     }
+    
+    @Override
+    public boolean existsExact(User user, String mainEmail) {
+        return mainEmailRepo.existsByUserAndMainEmail(user, mainEmail);
+    }
+    
+    @Override
+    public MainEmail add (MainEmail mainEmail) {
+        return mainEmailRepo.save(mainEmail);
+    }
 
 }

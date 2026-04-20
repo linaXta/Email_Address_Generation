@@ -229,3 +229,28 @@
     font-weight: 700;
     color: #6b7280;
 }
+
+.main-emails-form-title {
+    font-weight: 800;
+    font-size: 20px;
+}
+
+.main-emails-form-input {
+    width: 320px;
+}
+
+.main-emails-add-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 120px;
+    gap: 14px;
+}
+
+.main-emails-form-description {
+    color: #777;
+    font-size: 14px;
+    text-align: center;
+}

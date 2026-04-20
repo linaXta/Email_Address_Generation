@@ -10,5 +10,9 @@ public interface ICRUDMainEmailService extends ICRUDBase<MainEmail> {
 	ArrayList<MainEmail> retrieveAllByUser(User user) throws Exception ;
 
     ArrayList<MainEmail> searchByUserAndText(User user, String searchText) throws Exception;
+    
+    boolean existsExact(User user, String mainEmail);
+    
+    MainEmail add(MainEmail mainEmail);
 
 }

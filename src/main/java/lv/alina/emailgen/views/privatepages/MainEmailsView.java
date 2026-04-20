@@ -60,6 +60,15 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
         buildLayout();
         refreshTable();
     }
+    
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        User loggedInUser = VaadinSession.getCurrent().getAttribute(User.class);
+
+        if (loggedInUser == null) {
+            event.forwardTo("login");
+        }
+    }
 
     private void buildLayout() {
         addClassName("main-emails-page");
@@ -95,6 +104,7 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
         Button addNewButton = new Button("ADD NEW");
         addNewButton.setIcon(new Icon(VaadinIcon.PLUS));
         addNewButton.addClassName("main-emails-add-button");
+        addNewButton.addClickListener(event -> getUI().ifPresent(ui -> ui.navigate("main-emails/add")));
 
         topBar.add(menuButton, searchField, addNewButton);
         topBar.expand(searchField);
@@ -210,6 +220,7 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
 
             Button addNewButton = new Button("Add new base e-mail");
             addNewButton.addClassName("main-emails-add-empty-button");
+            addNewButton.addClickListener(event -> getUI().ifPresent(ui -> ui.navigate("main-emails/add")));
 
             emptyState.add(emptyText, addNewButton);
             tableContent.add(emptyState);
@@ -280,15 +291,6 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
         return (int) Math.ceil((double) allFilteredMainEmails.size() / pageSize);
     }
     
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        User loggedInUser = VaadinSession.getCurrent().getAttribute(User.class);
-
-        if (loggedInUser == null) {
-            event.forwardTo("login");
-        }
-    }
-    
     private DownloadHandler createDownloadHandler() {
     	return DownloadHandler.fromInputStream(event ->
     		new DownloadResponse(createExcelFile(),"main-emails.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", -1)
@@ -308,7 +310,7 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
 
             for (int i = 0; i < allFilteredMainEmails.size(); i++) {
                 Row row = sheet.createRow(i + 1);
-                row.createCell(0).setCellValue(i + 1);
+                row.createCell(0).setCellValue(i + 1 + ".");
                 row.createCell(1).setCellValue(allFilteredMainEmails.get(i).getMainEmail());
             }
 
