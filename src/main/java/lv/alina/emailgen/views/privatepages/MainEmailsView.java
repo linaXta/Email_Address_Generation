@@ -296,20 +296,24 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
     }
     
     private ByteArrayInputStream createExcelFile() {
+    	
         try (XSSFWorkbook workbook = new XSSFWorkbook();
-             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        	ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
             Sheet sheet = workbook.createSheet("Main Emails");
 
             Row headerRow = sheet.createRow(0);
-            headerRow.createCell(0).setCellValue("E-mail");
+            headerRow.createCell(0).setCellValue("Nr.");
+            headerRow.createCell(1).setCellValue("E-mail");
 
             for (int i = 0; i < allFilteredMainEmails.size(); i++) {
                 Row row = sheet.createRow(i + 1);
-                row.createCell(0).setCellValue(allFilteredMainEmails.get(i).getMainEmail());
+                row.createCell(0).setCellValue(i + 1);
+                row.createCell(1).setCellValue(allFilteredMainEmails.get(i).getMainEmail());
             }
 
-            sheet.autoSizeColumn(0);
+           sheet.autoSizeColumn(0);
+           sheet.autoSizeColumn(1);
 
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
