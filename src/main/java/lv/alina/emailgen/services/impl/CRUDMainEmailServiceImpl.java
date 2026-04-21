@@ -1,6 +1,7 @@
 package lv.alina.emailgen.services.impl;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -91,6 +92,11 @@ public class CRUDMainEmailServiceImpl implements ICRUDMainEmailService{
     @Override
     public MainEmail add (MainEmail mainEmail) {
         return mainEmailRepo.save(mainEmail);
+    }
+    
+    @Override
+    public Optional<MainEmail> findById(Long id) {
+        return mainEmailRepo.findById(id);
     }
 
 }

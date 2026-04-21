@@ -252,6 +252,8 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
             copyButton.addClickListener(event -> { getUI().ifPresent(ui -> ui.getPage().executeJs("navigator.clipboard.writeText($0)", mainEmail.getMainEmail() ));
                 Notification.show("E-mail copied");
             });
+            
+            editButton.addClickListener(event -> getUI().ifPresent(ui -> ui.navigate("main-emails/edit/" + mainEmail.getMainEmailId())));
 
             actionButtons.add(historyButton, editButton, copyButton, deleteButton);
 
