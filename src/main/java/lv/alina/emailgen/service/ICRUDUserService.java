@@ -1,9 +1,15 @@
 package lv.alina.emailgen.service;
 
+import java.util.ArrayList;
+
 import lv.alina.emailgen.models.User;
 import lv.alina.emailgen.repos.IMainEmailRepo;
 
-public interface ICRUDUserService extends ICRUDBase<User>{
+public interface ICRUDUserService {
+	
+	ArrayList<User> retrieveAll() throws Exception;
+	User retrieveById(Long id) throws Exception;
+	void deleteById(Long id) throws Exception;
     
 	User createUser(String email, String passwordHash, String fullName) throws Exception;
 	

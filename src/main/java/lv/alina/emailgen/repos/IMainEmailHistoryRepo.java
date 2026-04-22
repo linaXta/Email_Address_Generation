@@ -29,5 +29,7 @@ public interface IMainEmailHistoryRepo extends CrudRepository<MainEmailHistory, 
     );
 
     long countByMainEmail(MainEmail mainEmail);
+    
+    void deleteByMainEmail(MainEmail mainEmail);
 
 }

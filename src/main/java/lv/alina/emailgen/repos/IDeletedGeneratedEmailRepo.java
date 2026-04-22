@@ -10,5 +10,7 @@ public interface IDeletedGeneratedEmailRepo extends CrudRepository<DeletedGenera
 	boolean existsByEmailAddress(String emailAddress);
 	
 	boolean existsByMainEmailAndEmailAddress(MainEmail mainEmail, String emailAddress);
+	
+	void deleteByMainEmail(MainEmail mainEmail);
 
 }

@@ -4,9 +4,14 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import lv.alina.emailgen.models.GeneratedEmail;
 import lv.alina.emailgen.models.MainEmail;
 import lv.alina.emailgen.models.User;
+import lv.alina.emailgen.repos.IDeletedGeneratedEmailRepo;
+import lv.alina.emailgen.repos.IGeneratedEmailRepo;
+import lv.alina.emailgen.repos.IMainEmailHistoryRepo;
 import lv.alina.emailgen.repos.IMainEmailRepo;
 import lv.alina.emailgen.service.ICRUDMainEmailService;
 
@@ -14,31 +19,15 @@ import lv.alina.emailgen.service.ICRUDMainEmailService;
 public class CRUDMainEmailServiceImpl implements ICRUDMainEmailService{
 	
 	private final IMainEmailRepo mainEmailRepo;
-	
-	public CRUDMainEmailServiceImpl(IMainEmailRepo mainEmailRepo) {
+	private final IGeneratedEmailRepo generatedEmailRepo;
+    private final IDeletedGeneratedEmailRepo deletedGeneratedEmailRepo;
+    private final IMainEmailHistoryRepo mainEmailHistoryRepo;
+    
+	public CRUDMainEmailServiceImpl(IMainEmailRepo mainEmailRepo, IGeneratedEmailRepo generatedEmailRepo, IDeletedGeneratedEmailRepo deletedGeneratedEmailRepo, IMainEmailHistoryRepo mainEmailHistoryRepo) {
         this.mainEmailRepo = mainEmailRepo;
-    }
-	
-	@Override
-    public ArrayList<MainEmail> retrieveAll() throws Exception {
-        ArrayList<MainEmail> allMainEmails = new ArrayList<>();
-        mainEmailRepo.findAll().forEach(allMainEmails::add);
-        return allMainEmails;
-    }
-
-    @Override
-    public MainEmail retrieveById(Long id) throws Exception {
-        return mainEmailRepo.findById(id)
-                .orElseThrow(() -> new Exception("Main e-mail not found with id = " + id));
-    }
-
-    @Override
-    public void deleteById(Long id) throws Exception {
-        if (!mainEmailRepo.existsById(id)) {
-            throw new Exception("Main e-mail not found with id = " + id);
-        }
-
-        mainEmailRepo.deleteById(id);
+        this.generatedEmailRepo = generatedEmailRepo;
+        this.deletedGeneratedEmailRepo = deletedGeneratedEmailRepo;
+        this.mainEmailHistoryRepo = mainEmailHistoryRepo;
     }
 
     @Override
@@ -97,6 +86,35 @@ public class CRUDMainEmailServiceImpl implements ICRUDMainEmailService{
     @Override
     public Optional<MainEmail> findById(Long id) {
         return mainEmailRepo.findById(id);
+    }
+    
+    @Override
+    @Transactional
+    public void deleteMainOnly(MainEmail mainEmail) {
+        ArrayList<GeneratedEmail> generatedEmails = generatedEmailRepo.findByMainEmail(mainEmail);
+
+        for (GeneratedEmail generatedEmail : generatedEmails) {
+            generatedEmail.setMainEmail(null);
+            generatedEmailRepo.save(generatedEmail);
+        }
+
+        deletedGeneratedEmailRepo.deleteByMainEmail(mainEmail);
+        mainEmailHistoryRepo.deleteByMainEmail(mainEmail);
+        mainEmailRepo.delete(mainEmail);
+    }
+    
+    @Override
+    @Transactional
+    public void deleteWithGenerated(MainEmail mainEmail) {
+    	ArrayList<GeneratedEmail> generatedEmails = generatedEmailRepo.findByMainEmail(mainEmail);
+
+        for (GeneratedEmail generatedEmail : generatedEmails) {
+            generatedEmailRepo.delete(generatedEmail);
+        }
+
+        deletedGeneratedEmailRepo.deleteByMainEmail(mainEmail);
+        mainEmailHistoryRepo.deleteByMainEmail(mainEmail);
+        mainEmailRepo.delete(mainEmail);
     }
 
 }

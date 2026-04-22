@@ -1,3 +1,7 @@
+/* =========================
+   1. PAGE + SHELL
+   ========================= */
+
 .main-emails-page {
     width: 100%;
     min-height: 100vh;
@@ -16,16 +20,27 @@
     padding: 26px;
     box-sizing: border-box;
     margin: 0 auto;
-
 }
+
+
+/* =========================
+   2. TOP BAR
+   ========================= */
 
 .main-emails-topbar {
+    width: 100%;
     gap: 24px;
-	margin-bottom: 28px;
+    margin-bottom: 28px;
 }
 
+
+/* =========================
+   3. MAIN BUTTONS
+   ========================= */
+
 .main-emails-menu-button,
-.main-emails-add-button {
+.main-emails-add-button,
+.main-emails-export-button {
     background: #efc690;
     color: #1f1f1f;
     border: 3px solid #2b2b2b;
@@ -41,12 +56,14 @@
 }
 
 .main-emails-menu-button:hover,
-.main-emails-add-button:hover {
+.main-emails-add-button:hover,
+.main-emails-export-button:hover {
     background: #e8bb7e;
 }
 
 .main-emails-menu-button:active,
-.main-emails-add-button:active {
+.main-emails-add-button:active,
+.main-emails-export-button:active {
     transform: scale(0.98);
 }
 
@@ -55,24 +72,43 @@
 }
 
 .main-emails-add-button {
-    min-width: 160px;
+    min-width: 170px;
+    gap: 4px;
+}
+
+.main-emails-export-button {
+    min-width: 140px;
+    height: 44px;
+    padding: 0 20px;
+    border-radius: 18px;
+    font-size: 16px;
 }
 
 .main-emails-add-button vaadin-icon {
     width: 24px;
     height: 24px;
-    margin-right: 8px;
+    margin-right: 10px;
+    flex-shrink: 0;
 }
 
-.main-emails-add-empty-button {
-    background: #efc696;
-    border: 3px solid #232323;
-    border-radius: 18px;
-    color: #1f1f1f;
-    font-weight: 800;
-    min-height: 54px;
-    padding: 0 24px;
+
+/* =========================
+   4. LINKS
+   ========================= */
+
+.main-emails-export-link {
+    text-decoration: none;
+    color: inherit;
 }
+
+.main-emails-export-link:hover {
+    text-decoration: none;
+}
+
+
+/* =========================
+   5. SEARCH FIELD
+   ========================= */
 
 .main-emails-search {
     --vaadin-input-field-background: #f4eadb;
@@ -81,22 +117,20 @@
     --vaadin-input-field-radius: 18px;
 }
 
+
+/* =========================
+   6. TABLE HEADER AREA
+   ========================= */
+
 .main-emails-table-header {
     border: 3px solid #232323;
     border-bottom: none;
     padding: 14px 18px;
     box-sizing: border-box;
-	width: 100%;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
-
-..main-emails-right-side {
+    width: 100%;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 14px;
-    margin-left: auto;
 }
 
 .main-emails-left-side {
@@ -104,6 +138,19 @@
     align-items: center;
     gap: 14px;
 }
+
+.main-emails-right-side {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-left: auto;
+    flex-wrap: nowrap;
+}
+
+
+/* =========================
+   7. SORT BOX
+   ========================= */
 
 .main-emails-sort-box {
     max-width: 220px;
@@ -114,27 +161,10 @@
     font-weight: 700;
 }
 
-.main-emails-export-link {
-    text-decoration: none;
-}
 
-.main-emails-export-button {
-    background: #efc690;
-    color: #1f1f1f;
-    border: 3px solid #2b2b2b;
-    border-radius: 18px;
-    font-weight: 800;
-    font-size: 16px;
-    text-transform: uppercase;
-    height: 44px;
-    padding: 0 20px;
-    box-shadow: none;
-    cursor: pointer;
-}
-
-.main-emails-export-button:hover {
-    background: #e8bb7e;
-}
+/* =========================
+   8. PAGINATION
+   ========================= */
 
 .main-emails-page-info {
     color: #7b7b7b;
@@ -155,10 +185,21 @@
     opacity: 0.45;
 }
 
+
+/* =========================
+   9. TABLE CONTENT
+   ========================= */
+
 .main-emails-table-content {
     border: 3px solid #232323;
     box-sizing: border-box;
+    width: 100%;
 }
+
+
+/* =========================
+   10. TABLE ROW
+   ========================= */
 
 .main-emails-row {
     min-height: 64px;
@@ -177,6 +218,11 @@
     font-weight: 800;
     color: #1f1f1f;
 }
+
+
+/* =========================
+   11. ACTION BUTTONS INSIDE ROW
+   ========================= */
 
 .main-emails-actions {
     gap: 18px;
@@ -218,6 +264,11 @@
     opacity: 0.75;
 }
 
+
+/* =========================
+   12. EMPTY STATE
+   ========================= */
+
 .main-emails-empty-state {
     min-height: 260px;
     justify-content: center;
@@ -230,14 +281,20 @@
     color: #6b7280;
 }
 
-.main-emails-form-title {
+.main-emails-add-empty-button {
+    background: #efc696;
+    border: 3px solid #232323;
+    border-radius: 18px;
+    color: #1f1f1f;
     font-weight: 800;
-    font-size: 20px;
+    min-height: 54px;
+    padding: 0 24px;
 }
 
-.main-emails-form-input {
-    width: 320px;
-}
+
+/* =========================
+   13. ADD / EDIT FORM CONTENT
+   ========================= */
 
 .main-emails-add-content {
     width: 100%;
@@ -249,8 +306,120 @@
     gap: 14px;
 }
 
+.main-emails-form-title {
+    font-weight: 800;
+    font-size: 20px;
+    color: #1f1f1f;
+    text-align: center;
+}
+
+.main-emails-form-input {
+    width: 320px;
+}
+
 .main-emails-form-description {
-    color: #777;
+    color: #7b7b7b;
     font-size: 14px;
     text-align: center;
+}
+
+
+/* =========================
+   14. DELETE PAGE
+   ========================= */
+
+.main-emails-delete-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 70px;
+    gap: 0;
+    text-align: center;
+}
+
+.main-emails-delete-title {
+    font-size: 52px;
+    font-weight: 900;
+    color: #1f1f1f;
+    line-height: 1.1;
+    margin-bottom: 34px;
+    text-align: center;
+    word-break: break-word;
+}
+
+.main-emails-delete-danger-button,
+.main-emails-delete-warning-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-shadow: none;
+    cursor: pointer;
+    border-radius: 16px;
+    min-height: 56px;
+    padding: 0 28px;
+    font-size: 18px;
+    font-weight: 900;
+    border: 4px solid #2b2b2b;
+    color: #1f1f1f;
+    margin-bottom: 18px;
+}
+
+.main-emails-delete-danger-button {
+    background: #ff6b6b;
+    min-width: 340px;
+}
+
+.main-emails-delete-danger-button:hover {
+    background: #f45f5f;
+}
+
+.main-emails-delete-warning-button {
+    background: #efc690;
+    min-width: 340px;
+}
+
+.main-emails-delete-warning-button:hover {
+    background: #e8bb7e;
+}
+
+.main-emails-delete-danger-button::part(label),
+.main-emails-delete-warning-button::part(label) {
+    width: 100%;
+    text-align: center;
+}
+
+.main-emails-delete-text {
+    max-width: 760px;
+    color: #2f2f2f;
+    font-size: 15px;
+    line-height: 1.45;
+    text-align: center;
+    margin-bottom: 34px;
+}
+
+.main-emails-delete-divider {
+    width: 100%;
+    max-width: 840px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 6px 0 30px 0;
+}
+
+.main-emails-delete-divider::before,
+.main-emails-delete-divider::after {
+    content: "";
+    flex: 1;
+    height: 3px;
+    background: #2b2b2b;
+}
+
+.main-emails-delete-divider-text {
+    margin: 0 18px;
+    font-size: 18px;
+    font-weight: 900;
+    color: #1f1f1f;
+    line-height: 1;
 }

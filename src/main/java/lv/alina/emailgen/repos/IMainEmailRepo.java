@@ -1,5 +1,7 @@
 package lv.alina.emailgen.repos;
 
+import java.util.Optional;
+
 import org.springframework.data.repository.CrudRepository;
 
 import lv.alina.emailgen.models.MainEmail;
@@ -12,5 +14,7 @@ public interface IMainEmailRepo extends CrudRepository<MainEmail, Long>{
 	boolean existsByUserAndMainEmailIgnoreCase(User user, String mainEmail);
 	
 	boolean existsByUserAndMainEmail(User user, String mainEmail);
+	
+	Optional<MainEmail> findById(Long id);
 	
 }

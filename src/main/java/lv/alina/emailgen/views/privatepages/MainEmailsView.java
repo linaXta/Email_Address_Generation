@@ -248,12 +248,10 @@ public class MainEmailsView extends VerticalLayout implements BeforeEnterObserve
             Button editButton = createActionButton("EDIT", VaadinIcon.EDIT);
             Button copyButton = createActionButton("COPY", VaadinIcon.COPY_O);
             Button deleteButton = createActionButton("DELETE", VaadinIcon.TRASH);
-
-            copyButton.addClickListener(event -> { getUI().ifPresent(ui -> ui.getPage().executeJs("navigator.clipboard.writeText($0)", mainEmail.getMainEmail() ));
-                Notification.show("E-mail copied");
-            });
             
             editButton.addClickListener(event -> getUI().ifPresent(ui -> ui.navigate("main-emails/edit/" + mainEmail.getMainEmailId())));
+            copyButton.addClickListener(event -> { getUI().ifPresent(ui -> ui.getPage().executeJs("navigator.clipboard.writeText($0)", mainEmail.getMainEmail() ));Notification.show("E-mail copied");});
+            deleteButton.addClickListener(event ->getUI().ifPresent(ui -> ui.navigate("main-emails/delete/" + mainEmail.getMainEmailId())));
 
             actionButtons.add(historyButton, editButton, copyButton, deleteButton);
 

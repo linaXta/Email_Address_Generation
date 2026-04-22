@@ -6,7 +6,7 @@ import java.util.Optional;
 import lv.alina.emailgen.models.MainEmail;
 import lv.alina.emailgen.models.User;
 
-public interface ICRUDMainEmailService extends ICRUDBase<MainEmail> {
+public interface ICRUDMainEmailService {
 	
 	ArrayList<MainEmail> retrieveAllByUser(User user) throws Exception ;
 
@@ -17,5 +17,9 @@ public interface ICRUDMainEmailService extends ICRUDBase<MainEmail> {
     MainEmail add(MainEmail mainEmail);
 
 	Optional<MainEmail> findById(Long id);
+	
+	void deleteWithGenerated(MainEmail mainEmail);
+	
+	void deleteMainOnly(MainEmail mainEmail);
 
 }
