@@ -2,13 +2,21 @@ package lv.alina.emailgen.services.impl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lv.alina.emailgen.models.MainEmail;
 import lv.alina.emailgen.models.User;
+import lv.alina.emailgen.repos.ICompanyRepo;
+import lv.alina.emailgen.repos.IDeletedGeneratedEmailRepo;
+import lv.alina.emailgen.repos.IGeneratedEmailRepo;
+import lv.alina.emailgen.repos.IMainEmailHistoryRepo;
 import lv.alina.emailgen.repos.IMainEmailRepo;
+import lv.alina.emailgen.repos.IShortCodesRepo;
+import lv.alina.emailgen.repos.ISymbolRepo;
 import lv.alina.emailgen.repos.IUserRepo;
 import lv.alina.emailgen.service.ICRUDUserService;
 
@@ -18,12 +26,25 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
 	private final IUserRepo userRepo;
 	private final IMainEmailRepo mainEmailRepo;
 	private final PasswordEncoder passwordEncoder;
+	private final IGeneratedEmailRepo generatedEmailRepo;
+	private final IDeletedGeneratedEmailRepo deletedGeneratedEmailRepo;
+	private final IMainEmailHistoryRepo mainEmailHistoryRepo;
+	private final ICompanyRepo companyRepo;
+	private final IShortCodesRepo shortCodesRepo;
+	private final ISymbolRepo symbolRepo;
 	
 	
-	public CRUDUserServiceImpl(IUserRepo userRepo, IMainEmailRepo mainEmailRepo, PasswordEncoder passwordEncoder) {
+	public CRUDUserServiceImpl(IUserRepo userRepo, IMainEmailRepo mainEmailRepo, PasswordEncoder passwordEncoder, IGeneratedEmailRepo generatedEmailRepo, IDeletedGeneratedEmailRepo deletedGeneratedEmailRepo, IMainEmailHistoryRepo mainEmailHistoryRepo, ICompanyRepo companyRepo,IShortCodesRepo shortCodesRepo, ISymbolRepo symbolRepo ) {
+		
         this.userRepo = userRepo;
         this.mainEmailRepo = mainEmailRepo;
         this.passwordEncoder = passwordEncoder;
+        this.generatedEmailRepo = generatedEmailRepo;
+        this.deletedGeneratedEmailRepo = deletedGeneratedEmailRepo;
+        this.mainEmailHistoryRepo = mainEmailHistoryRepo;
+        this.companyRepo = companyRepo;
+        this.shortCodesRepo = shortCodesRepo;
+        this.symbolRepo = symbolRepo;
     }
 
     @Override
@@ -42,11 +63,24 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
 
     
     @Override
+    @Transactional
     public void deleteById(Long id) throws Exception {
-        if (!userRepo.existsById(id)) {
-            throw new Exception("User is not found with id = " + id);
+    	User user = userRepo.findById(id).orElseThrow(() -> new Exception("User not found"));
+
+        List<MainEmail> mainEmails = mainEmailRepo.findByUser(user);
+
+        for (MainEmail mainEmail : mainEmails) {
+            generatedEmailRepo.deleteByMainEmail(mainEmail);
+            deletedGeneratedEmailRepo.deleteByMainEmail(mainEmail);
+            mainEmailHistoryRepo.deleteByMainEmail(mainEmail);
         }
-        userRepo.deleteById(id);
+
+        mainEmailRepo.deleteByUser(user);
+        companyRepo.deleteByUser(user);
+        shortCodesRepo.deleteByUser(user);
+        symbolRepo.deleteByUser(user);
+
+        userRepo.delete(user);
     }
 
     @Override

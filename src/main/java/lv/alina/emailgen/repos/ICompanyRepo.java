@@ -10,5 +10,7 @@ public interface ICompanyRepo extends CrudRepository<Company, Long> {
 	Company findByUserAndCompanyNameIgnoreCase(User user, String companyName);
 	
 	boolean existsByUserAndCompanyNameIgnoreCase(User user, String companyName);
+	
+	void deleteByUser(User user);
 
 }

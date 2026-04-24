@@ -10,5 +10,7 @@ public interface IShortCodesRepo extends CrudRepository<ShortCodes, Long> {
 	boolean existsByUserAndShortCode(User user, String shortCode);
 	
 	ShortCodes findByUserAndShortCode(User user, String shortCode);
+	
+	void deleteByUser(User user);
 
 }
