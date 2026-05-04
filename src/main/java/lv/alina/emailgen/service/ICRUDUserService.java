@@ -24,5 +24,7 @@ public interface ICRUDUserService {
     User loginUser(String email, String rawPassword) throws Exception;
     
     void updatePasswordByEmail(String email, String newRawPassword) throws Exception;
+    
+    boolean isPasswordCorrect(User user, String rawPassword) throws Exception;
 
 }

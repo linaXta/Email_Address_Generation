@@ -227,6 +227,19 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
         userRepo.save(user);
     }
     
+    @Override
+    public boolean isPasswordCorrect(User user, String rawPassword) throws Exception {
+        if (user == null) {
+            throw new Exception("User is required");
+        }
+
+        if (rawPassword == null || rawPassword.isBlank()) {
+            return false;
+        }
+
+        return passwordEncoder.matches(rawPassword, user.getPasswordHash());
+    }
+    
     private boolean isEmailFormatValid(String email) {
         if (email == null || email.isBlank()) {
             return false;
