@@ -12,7 +12,7 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@ToString(exclude = {"user", "shortCodes", "counters", "generatedEmails"})
+@ToString(exclude = {"user", "shortCodes", "counters", "generatedEmails", "defaultMainEmail"})
 public class Company {
 	
 	@Id
@@ -37,12 +37,12 @@ public class Company {
 	@JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_company_user"))
 	private User user;
 	
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "symbol_before_shortcode_id", nullable = false,foreignKey = @ForeignKey(name = "fk_symbol_before_shortcode"))
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "symbol_before_shortcode_id", nullable = true, foreignKey = @ForeignKey(name = "fk_symbol_before_shortcode"))
     private Symbol symbolBeforeShortcode;
     
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "symbol_before_sequence_id", nullable = false,foreignKey = @ForeignKey(name = "fk_symbol_before_sequence"))
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "symbol_before_sequence_id", nullable = true, foreignKey = @ForeignKey(name = "fk_symbol_before_sequence"))
     private Symbol symbolBeforeSequence;
 
     @OneToMany(mappedBy = "company")
@@ -57,6 +57,10 @@ public class Company {
     @OneToOne
     @JoinColumn(name = "current_short_code_id", nullable = true, unique = true, foreignKey = @ForeignKey(name = "fk_company_current_shortcode"))
     private ShortCodes currentShortCode;
+    
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "default_main_email_id", nullable = true, foreignKey = @ForeignKey(name = "fk_company_default_main_email"))
+    private MainEmail defaultMainEmail;
 
     @PrePersist
     protected void onCreate() {
@@ -69,17 +73,11 @@ public class Company {
         this.updatedAt = LocalDateTime.now();
     }
     
-    public Company(User user, String companyName, String notes, Symbol symbolBeforeShortcode, Symbol symbolBeforeSequence) {
+    public Company(User user, String companyName, String notes, MainEmail defaultMainEmail) {
         this.user = user;
         this.companyName = companyName;
         this.notes = notes;
-        this.symbolBeforeShortcode = symbolBeforeShortcode;
-        this.symbolBeforeSequence = symbolBeforeSequence;
+        this.defaultMainEmail = defaultMainEmail;
     }
-    
-    public void setCurrentShortCode(ShortCodes currentShortCode) {
-        this.currentShortCode = currentShortCode;
-    }
-    
 
 }

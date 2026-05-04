@@ -1,5 +1,7 @@
 package lv.alina.emailgen.repos;
 
+import java.util.ArrayList;
+
 import org.springframework.data.repository.CrudRepository;
 
 import lv.alina.emailgen.models.Company;
@@ -12,5 +14,7 @@ public interface ICompanyRepo extends CrudRepository<Company, Long> {
 	boolean existsByUserAndCompanyNameIgnoreCase(User user, String companyName);
 	
 	void deleteByUser(User user);
+	
+	ArrayList<Company> findByUser(User user);
 
 }
