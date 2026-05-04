@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.springframework.data.repository.CrudRepository;
 
 import lv.alina.emailgen.models.Company;
+import lv.alina.emailgen.models.GeneratedEmail;
 import lv.alina.emailgen.models.User;
 
 public interface ICompanyRepo extends CrudRepository<Company, Long> {
