@@ -47,7 +47,7 @@ public class MainView extends VerticalLayout implements BeforeEnterObserver {
 		);
 
         companiesButton.addClickListener(event ->
-                Notification.show("Company's page will be added later.")
+        	getUI().ifPresent(ui -> ui.navigate("companies"))
         );
 
         generatorButton.addClickListener(event ->

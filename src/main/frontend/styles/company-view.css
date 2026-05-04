@@ -1,0 +1,122 @@
+/* PAGE */
+
+.company-page {
+    width: 100%;
+    min-height: 100vh;
+    background: #f6ecdd;
+    padding: 28px;
+    box-sizing: border-box;
+}
+
+.company-shell {
+    width: 100%;
+    max-width: 1200px;
+    background: #f8efdf;
+    border: 1px solid #e2d3bd;
+    border-radius: 20px;
+    padding: 24px;
+    margin: 0 auto;
+}
+
+
+/* TOP BAR */
+
+.company-topbar {
+    width: 100%;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+
+/* BUTTONS */
+
+.company-menu-button,
+.company-add-button {
+	background: #efc690;
+	color: #1f1f1f;
+	border: 3px solid #2b2b2b;
+	border-radius: 20px;
+	font-weight: 800;
+	font-size: 18px;
+	text-transform: uppercase;
+	height: 54px;
+	padding: 0 28px;
+	box-shadow: none;
+	cursor: pointer;
+	transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.company-add-button vaadin-icon,
+.company-add-empty-button vaadin-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.company-menu-button:hover,
+.company-add-button:hover {
+    background: #e8bb7e;
+}
+
+
+/* SEARCH */
+
+.company-search {
+    --vaadin-input-field-background: #f4eadb;
+    --vaadin-input-field-border-width: 3px;
+    --vaadin-input-field-border-color: #232323;
+    --vaadin-input-field-border-radius: 18px;
+}
+
+
+/* LIST */
+
+.company-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.company-row {
+    background: #efc696;
+    border: 3px solid #232323;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.company-row-text {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+
+/* EMPTY */
+
+.company-empty {
+    height: 300px;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.company-empty-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: #6b6b6b;
+}
+
+.company-add-empty-button {
+    background: #efc696;
+	color: #1f1f1f;
+    border: 3px solid #232323;
+    border-radius: 16px;
+    padding: 12px 24px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.company-add-empty-button:hover {
+    background: #e8bb7e;
+}

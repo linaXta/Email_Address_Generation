@@ -3,6 +3,7 @@ package lv.alina.emailgen.services.impl;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lv.alina.emailgen.models.Company;
@@ -15,6 +16,7 @@ import lv.alina.emailgen.repos.IGeneratedEmailRepo;
 import lv.alina.emailgen.repos.IMainEmailHistoryRepo;
 import lv.alina.emailgen.service.ICRUDCompanyService;
 
+@Service
 public class CRUDCompanyServiceImpl implements ICRUDCompanyService{
 	
 	private final ICompanyRepo companyRepo;
