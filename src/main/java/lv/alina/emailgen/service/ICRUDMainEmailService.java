@@ -8,9 +8,9 @@ import lv.alina.emailgen.models.User;
 
 public interface ICRUDMainEmailService {
 	
-	ArrayList<MainEmail> retrieveAllByUser(User user) throws Exception ;
+	ArrayList<MainEmail> retrieveAllByUser(User user) ;
 
-    ArrayList<MainEmail> searchByUserAndText(User user, String searchText) throws Exception;
+    ArrayList<MainEmail> searchByUserAndText(User user, String searchText);
     
     boolean existsExact(User user, String mainEmail);
     

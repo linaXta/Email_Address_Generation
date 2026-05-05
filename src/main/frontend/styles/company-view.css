@@ -84,6 +84,7 @@
     border: 3px solid #232323;
     border-radius: 12px;
     padding: 16px;
+	cursor: pointer;
 }
 
 .company-row-text {
@@ -119,4 +120,111 @@
 
 .company-add-empty-button:hover {
     background: #e8bb7e;
+}
+
+/* FORM */
+
+.company-form-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 60px;
+    gap: 14px;
+}
+
+.company-form-title {
+    font-weight: 900;
+    font-size: 24px;
+    color: #1f1f1f;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.company-form-input {
+    width: 380px;
+
+    --vaadin-input-field-background: #f4eadb;
+    --vaadin-input-field-border-width: 3px;
+    --vaadin-input-field-border-color: #232323;
+    --vaadin-input-field-border-radius: 18px;
+}
+
+.company-shortcode-row {
+    width: 430px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 12px;
+}
+
+.company-info-icon {
+    width: 24px;
+    height: 24px;
+    color: #232323;
+    cursor: help;
+    margin-bottom: 14px;
+}
+
+.company-preview {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #1f1f1f;
+    background: #efc696;
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: 3px solid #232323;
+}
+
+.company-symbol-row {
+    width: 520px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 10px;
+}
+
+.company-symbol-row .company-form-input {
+    width: 380px;
+}
+
+.company-symbol-small-button,
+.company-symbol-delete-button {
+    background: #efc690;
+    color: #1f1f1f;
+    border: 3px solid #232323;
+    border-radius: 14px;
+    font-weight: 800;
+    height: 44px;
+    padding: 0 14px;
+    cursor: pointer;
+}
+
+.company-symbol-small-button:hover,
+.company-symbol-delete-button:hover {
+    background: #e8bb7e;
+}
+
+.company-symbol-delete-button {
+    font-size: 12px;
+}
+
+.company-symbol-dialog::part(overlay) {
+    background: #f8efdf;
+    border: 4px solid #232323;
+    border-radius: 18px;
+    box-shadow: none;
+}
+
+.company-symbol-dialog-content {
+    width: 420px;
+    min-height: 190px;
+    justify-content: center;
+    gap: 18px;
+}
+
+.company-symbol-dialog-buttons {
+    gap: 24px;
 }

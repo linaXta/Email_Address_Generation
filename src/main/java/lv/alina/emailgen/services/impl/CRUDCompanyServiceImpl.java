@@ -10,10 +10,13 @@ import lv.alina.emailgen.models.Company;
 import lv.alina.emailgen.models.GeneratedEmail;
 import lv.alina.emailgen.models.MainEmail;
 import lv.alina.emailgen.models.MainEmailHistory;
+import lv.alina.emailgen.models.ShortCodes;
+import lv.alina.emailgen.models.Symbol;
 import lv.alina.emailgen.models.User;
 import lv.alina.emailgen.repos.ICompanyRepo;
 import lv.alina.emailgen.repos.IGeneratedEmailRepo;
 import lv.alina.emailgen.repos.IMainEmailHistoryRepo;
+import lv.alina.emailgen.repos.IShortCodesRepo;
 import lv.alina.emailgen.service.ICRUDCompanyService;
 
 @Service
@@ -22,11 +25,14 @@ public class CRUDCompanyServiceImpl implements ICRUDCompanyService{
 	private final ICompanyRepo companyRepo;
 	private final IGeneratedEmailRepo generatedEmailRepo;
 	private final IMainEmailHistoryRepo mainEmailHistoryRepo;
+	private final IShortCodesRepo shortCodesRepo;
 
-    public CRUDCompanyServiceImpl(ICompanyRepo companyRepo, IGeneratedEmailRepo generatedEmailRepo, IMainEmailHistoryRepo mainEmailHistoryRepo) {
+    public CRUDCompanyServiceImpl(ICompanyRepo companyRepo, IGeneratedEmailRepo generatedEmailRepo, 
+    		IMainEmailHistoryRepo mainEmailHistoryRepo, IShortCodesRepo shortCodesRepo) {
         this.companyRepo = companyRepo;
         this.generatedEmailRepo = generatedEmailRepo;
         this.mainEmailHistoryRepo = mainEmailHistoryRepo;
+        this.shortCodesRepo = shortCodesRepo;
     }
 
     @Override
@@ -34,7 +40,6 @@ public class CRUDCompanyServiceImpl implements ICRUDCompanyService{
         if (user == null) {
             return new ArrayList<>();
         }
-
         return companyRepo.findByUser(user);
     }
 
@@ -61,7 +66,6 @@ public class CRUDCompanyServiceImpl implements ICRUDCompanyService{
                 filteredCompanies.add(company);
             }
         }
-
         return filteredCompanies;
     }
 
@@ -75,12 +79,12 @@ public class CRUDCompanyServiceImpl implements ICRUDCompanyService{
         if (user == null || companyName == null || companyName.isBlank()) {
             return false;
         }
-
         return companyRepo.existsByUserAndCompanyNameIgnoreCase(user, companyName.trim());
     }
 
     @Override
-    public Company add(User user, String companyName, String notes, MainEmail defaultMainEmail) throws Exception {
+    public Company add(User user, String companyName, String notes, MainEmail defaultMainEmail, 
+    		Symbol symbolBeforeShortcode, Symbol symbolBeforeSequence, String shortCode) throws Exception {
         if (user == null) {
             throw new Exception("User is required");
         }
@@ -100,12 +104,20 @@ public class CRUDCompanyServiceImpl implements ICRUDCompanyService{
         company.setCompanyName(trimmedCompanyName);
         company.setNotes(notes);
         company.setDefaultMainEmail(defaultMainEmail);
+        company.setSymbolBeforeShortcode(symbolBeforeShortcode);
+        company.setSymbolBeforeSequence(symbolBeforeSequence);
 
-        return companyRepo.save(company);
+        Company savedCompany = companyRepo.save(company);
+
+        ShortCodes currentShortCode = createShortCodeIfNeeded(user, savedCompany, shortCode);
+        savedCompany.setCurrentShortCode(currentShortCode);
+
+        return companyRepo.save(savedCompany);
     }
 
     @Override
-    public Company update(Company company, String companyName, String notes, MainEmail defaultMainEmail) throws Exception {
+    public Company update(Company company, String companyName, String notes, MainEmail defaultMainEmail,
+    		Symbol symbolBeforeShortcode, Symbol symbolBeforeSequence, String shortCode) throws Exception {
         if (company == null) {
             throw new Exception("Company is requred");
         }
@@ -125,14 +137,41 @@ public class CRUDCompanyServiceImpl implements ICRUDCompanyService{
         company.setCompanyName(trimmedCompanyName);
         company.setNotes(notes);
         company.setDefaultMainEmail(defaultMainEmail);
+        company.setSymbolBeforeShortcode(symbolBeforeShortcode);
+        company.setSymbolBeforeSequence(symbolBeforeSequence);
+
+        ShortCodes currentShortCode = createShortCodeIfNeeded(company.getUser(), company, shortCode);
+        company.setCurrentShortCode(currentShortCode);
 
         return companyRepo.save(company);
+    }
+    
+    private ShortCodes createShortCodeIfNeeded(User user, Company company, String shortCode) {
+        if (shortCode == null || shortCode.isBlank()) {
+            return null;
+        }
+
+        String value = shortCode.trim();
+
+        ShortCodes existingShortCode = shortCodesRepo.findByUserAndShortCode(user, value);
+
+        if (existingShortCode != null) {
+            existingShortCode.setCompany(company);
+            return shortCodesRepo.save(existingShortCode);
+        }
+
+        ShortCodes newShortCode = new ShortCodes();
+        newShortCode.setUser(user);
+        newShortCode.setCompany(company);
+        newShortCode.setShortCode(value);
+
+        return shortCodesRepo.save(newShortCode);
     }
 
     @Override
     @Transactional
     public void delete(Company company) {
-        ArrayList<GeneratedEmail> generatedEmails = generatedEmailRepo.findByCompany(company);
+    	ArrayList<GeneratedEmail> generatedEmails = generatedEmailRepo.findByCompany(company);
 
         for (GeneratedEmail generatedEmail : generatedEmails) {
             MainEmail mainEmail = generatedEmail.getMainEmail();
@@ -152,8 +191,6 @@ public class CRUDCompanyServiceImpl implements ICRUDCompanyService{
         }
 
         companyRepo.delete(company);
-    }
-	
-	
+    }	
 
 }

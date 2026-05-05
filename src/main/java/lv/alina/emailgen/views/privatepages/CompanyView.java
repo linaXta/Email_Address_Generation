@@ -46,7 +46,6 @@ public class CompanyView extends VerticalLayout implements BeforeEnterObserver{
             event.forwardTo("login");
             return;
         }
-
         loadCompanies(loggedInUser);
     }
 
@@ -76,9 +75,7 @@ public class CompanyView extends VerticalLayout implements BeforeEnterObserver{
         searchField.setPlaceholder("Search...");
         searchField.addClassName("company-search");
         searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
-        searchField.addClassName("company-search");
         searchField.setWidthFull();
-
         searchField.addValueChangeListener(e -> filter());
 
         Button addNewButton = new Button("ADD NEW");
@@ -125,7 +122,6 @@ public class CompanyView extends VerticalLayout implements BeforeEnterObserver{
                 filtered.add(c);
             }
         }
-
         renderList(filtered);
     }
 
@@ -145,6 +141,11 @@ public class CompanyView extends VerticalLayout implements BeforeEnterObserver{
             name.addClassName("company-row-text");
 
             row.add(name);
+
+            row.addClickListener(event ->
+                getUI().ifPresent(ui -> ui.navigate("companies/edit/" + c.getCompanyId()))
+            );
+
             listContainer.add(row);
         }
     }

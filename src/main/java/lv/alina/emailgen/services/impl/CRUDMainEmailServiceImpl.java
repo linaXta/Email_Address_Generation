@@ -31,7 +31,7 @@ public class CRUDMainEmailServiceImpl implements ICRUDMainEmailService{
     }
 
     @Override
-    public ArrayList<MainEmail> retrieveAllByUser(User user) throws Exception {
+    public ArrayList<MainEmail> retrieveAllByUser(User user) {
         ArrayList<MainEmail> userMainEmails = new ArrayList<>();
         if (user == null) {
             return userMainEmails;
@@ -47,7 +47,7 @@ public class CRUDMainEmailServiceImpl implements ICRUDMainEmailService{
     }
 
     @Override
-    public ArrayList<MainEmail> searchByUserAndText(User user, String searchText) throws Exception {
+    public ArrayList<MainEmail> searchByUserAndText(User user, String searchText) {
         ArrayList<MainEmail> filteredMainEmails = new ArrayList<>();
 
         if (user == null) {

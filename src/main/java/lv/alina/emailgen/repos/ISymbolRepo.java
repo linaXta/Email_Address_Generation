@@ -1,5 +1,7 @@
 package lv.alina.emailgen.repos;
 
+import java.util.ArrayList;
+
 import org.springframework.data.repository.CrudRepository;
 
 import lv.alina.emailgen.models.Symbol;
@@ -12,5 +14,7 @@ public interface ISymbolRepo extends CrudRepository<Symbol, Long> {
 	Symbol findByUserAndSymbol(User user, String symbol);
 	
 	void deleteByUser(User user);
+	
+	ArrayList<Symbol> findByUser(User user);
 
 }

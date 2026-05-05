@@ -6,6 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import lv.alina.emailgen.models.Company;
 import lv.alina.emailgen.models.GeneratedEmail;
+import lv.alina.emailgen.models.Symbol;
 import lv.alina.emailgen.models.User;
 
 public interface ICompanyRepo extends CrudRepository<Company, Long> {
@@ -17,5 +18,7 @@ public interface ICompanyRepo extends CrudRepository<Company, Long> {
 	void deleteByUser(User user);
 	
 	ArrayList<Company> findByUser(User user);
+	
+	long countBySymbolBeforeShortcodeOrSymbolBeforeSequence(Symbol symbolBeforeShortcode, Symbol symbolBeforeSequence);
 
 }
