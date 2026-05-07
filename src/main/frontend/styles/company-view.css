@@ -1,25 +1,41 @@
-/* PAGE */
+/* =========================
+   1. PAGE + SHELL
+   ========================= */
+   
+   html,
+   body,
+   #outlet,
+   vaadin-app-layout,
+   vaadin-vertical-layout {
+       background: #f6ecdd;
+   }
+  
+   .company-page {
+       width: 100%;
+       min-height: 100vh;
+       background: #f6ecdd;
+       padding: 28px;
+       padding-bottom: 80px;
+       box-sizing: border-box;
+   }
 
-.company-page {
-    width: 100%;
-    min-height: 100vh;
-    background: #f6ecdd;
-    padding: 28px;
-    box-sizing: border-box;
-}
+	.company-shell {
+	    width: 100%;
+	    max-width: 1200px;
+	    background: #f8efdf;
+	    border: 1px solid #e2d3bd;
+	    border-radius: 20px;
+	    padding: 24px 24px 60px 24px;
+	    margin: 0 auto;
+	
+	    display: flex;
+	    flex-direction: column;
+	    align-items: center;
+	}
 
-.company-shell {
-    width: 100%;
-    max-width: 1200px;
-    background: #f8efdf;
-    border: 1px solid #e2d3bd;
-    border-radius: 20px;
-    padding: 24px;
-    margin: 0 auto;
-}
-
-
-/* TOP BAR */
+/* =========================
+   2. TOP BAR
+   ========================= */
 
 .company-topbar {
     width: 100%;
@@ -28,22 +44,34 @@
 }
 
 
-/* BUTTONS */
+/* =========================
+   3. BUTTONS
+   ========================= */
 
 .company-menu-button,
 .company-add-button {
-	background: #efc690;
-	color: #1f1f1f;
-	border: 3px solid #2b2b2b;
-	border-radius: 20px;
-	font-weight: 800;
-	font-size: 18px;
-	text-transform: uppercase;
-	height: 54px;
-	padding: 0 28px;
-	box-shadow: none;
-	cursor: pointer;
-	transition: transform 0.15s ease, background 0.15s ease;
+    background: #efc690;
+    color: #1f1f1f;
+    border: 3px solid #2b2b2b;
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 18px;
+    text-transform: uppercase;
+    height: 54px;
+    padding: 0 28px;
+    box-shadow: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.company-menu-button:hover,
+.company-add-button:hover {
+    background: #e8bb7e;
+}
+
+.company-menu-button:active,
+.company-add-button:active {
+    transform: scale(0.98);
 }
 
 .company-add-button vaadin-icon,
@@ -54,13 +82,10 @@
     flex-shrink: 0;
 }
 
-.company-menu-button:hover,
-.company-add-button:hover {
-    background: #e8bb7e;
-}
 
-
-/* SEARCH */
+/* =========================
+   4. SEARCH
+   ========================= */
 
 .company-search {
     --vaadin-input-field-background: #f4eadb;
@@ -70,7 +95,9 @@
 }
 
 
-/* LIST */
+/* =========================
+   5. COMPANY LIST
+   ========================= */
 
 .company-list {
     width: 100%;
@@ -80,23 +107,34 @@
 }
 
 .company-row {
+    width: 100%;
     background: #efc696;
     border: 3px solid #232323;
     border-radius: 12px;
     padding: 16px;
-	cursor: pointer;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.company-row:hover {
+    background: #e8bb7e;
 }
 
 .company-row-text {
     font-size: 20px;
     font-weight: 800;
+    color: #1f1f1f;
 }
 
 
-/* EMPTY */
+/* =========================
+   6. EMPTY STATE
+   ========================= */
 
 .company-empty {
-    height: 300px;
+    width: 100%;
+    min-height: 300px;
     justify-content: center;
     align-items: center;
     gap: 20px;
@@ -110,39 +148,44 @@
 
 .company-add-empty-button {
     background: #efc696;
-	color: #1f1f1f;
+    color: #1f1f1f;
     border: 3px solid #232323;
     border-radius: 16px;
     padding: 12px 24px;
     font-weight: 800;
     cursor: pointer;
+    box-shadow: none;
 }
 
 .company-add-empty-button:hover {
     background: #e8bb7e;
 }
 
-/* FORM */
+
+/* =========================
+   7. FORM LAYOUT
+   ========================= */
 
 .company-form-content {
     width: 100%;
+    max-width: 760px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 60px;
-    gap: 14px;
+    margin: 60px auto 0;
+    gap: 18px;
 }
 
 .company-form-title {
     font-weight: 900;
-    font-size: 24px;
+    font-size: 34px;
     color: #1f1f1f;
     text-align: center;
     margin-bottom: 10px;
 }
 
 .company-form-input {
-    width: 380px;
+    width: 620px;
 
     --vaadin-input-field-background: #f4eadb;
     --vaadin-input-field-border-width: 3px;
@@ -150,66 +193,145 @@
     --vaadin-input-field-border-radius: 18px;
 }
 
-.company-shortcode-row {
-    width: 430px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 12px;
+.company-form-content > .company-form-input {
+    width: 620px;
+    align-self: flex-start;
+    margin-left: 40px;
 }
 
-.company-info-icon {
-    width: 24px;
-    height: 24px;
-    color: #232323;
-    cursor: help;
-    margin-bottom: 14px;
+/* =========================
+   8. FORM ROWS WITH INFO ICON
+   ========================= */
+
+   .company-field-info-row,
+   .company-symbol-row {
+       width: 680px;
+       display: flex;
+       align-items: flex-end;
+       justify-content: flex-start;
+       gap: 14px;
+   }
+
+.company-field-info-row .company-form-input,
+.company-symbol-row .company-form-input { 
+	width: 620px;
 }
+
+
+/* =========================
+   9. INFO ICON + TOOLTIP
+   ========================= */
+
+.company-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.company-title-info-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.company-title-info-icon {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border: 3px solid #232323;
+    border-radius: 50%;
+    color: #232323;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: help;
+    transition: opacity 0.15s ease;
+}
+
+.company-title-info-icon:hover {
+    opacity: 0.75;
+}
+
+.company-title-tooltip {
+    display: none;
+    position: absolute;
+    left: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 420px;
+    background: #f8efdf;
+    border: 3px solid #232323;
+    border-radius: 14px;
+    padding: 12px 14px;
+    color: #1f1f1f;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+    text-align: left;
+    z-index: 100;
+    box-sizing: border-box;
+}
+
+.company-title-info-wrapper:hover .company-title-tooltip {
+    display: block;
+}
+
+.company-field-info-row .company-title-info-wrapper,
+.company-symbol-row .company-title-info-wrapper {
+    transform: translateY(-12px);
+}
+/* =========================
+   10. MANAGE SYMBOLS
+   ========================= */
+
+.company-manage-symbols-button {
+    background: transparent;
+    color: #1f5fbf;
+    border: none;
+    font-size: 18px;
+    font-weight: 900;
+    text-decoration: underline;
+    cursor: pointer;
+    box-shadow: none;
+    margin: 0 0 6px;
+    padding: 0;
+}
+
+.company-manage-symbols-button:hover {
+    opacity: 0.75;
+}
+
+
+/* =========================
+   11. PREVIEW
+   ========================= */
 
 .company-preview {
     margin-top: 8px;
     margin-bottom: 8px;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 800;
     color: #1f1f1f;
     background: #efc696;
-    padding: 10px 16px;
+    padding: 12px 18px;
     border-radius: 12px;
     border: 3px solid #232323;
+    max-width: 700px;
+    box-sizing: border-box;
+    text-align: center;
+    word-break: break-word;
 }
 
-.company-symbol-row {
-    width: 520px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 10px;
-}
 
-.company-symbol-row .company-form-input {
-    width: 380px;
-}
-
-.company-symbol-small-button,
-.company-symbol-delete-button {
-    background: #efc690;
-    color: #1f1f1f;
-    border: 3px solid #232323;
-    border-radius: 14px;
-    font-weight: 800;
-    height: 44px;
-    padding: 0 14px;
-    cursor: pointer;
-}
-
-.company-symbol-small-button:hover,
-.company-symbol-delete-button:hover {
-    background: #e8bb7e;
-}
-
-.company-symbol-delete-button {
-    font-size: 12px;
-}
+/* =========================
+   12. SYMBOL DIALOG
+   ========================= */
 
 .company-symbol-dialog::part(overlay) {
     background: #f8efdf;
@@ -219,12 +341,116 @@
 }
 
 .company-symbol-dialog-content {
-    width: 420px;
-    min-height: 190px;
-    justify-content: center;
+    width: 460px;
+    min-height: 320px;
     gap: 18px;
+    justify-content: center;
 }
 
 .company-symbol-dialog-buttons {
     gap: 24px;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* =========================
+   13. SYMBOL LIST IN DIALOG
+   ========================= */
+
+.company-symbol-list {
+    width: 100%;
+    max-height: 220px;
+    overflow-y: auto;
+    border: 3px solid #232323;
+    border-radius: 14px;
+    background: #f6ecdd;
+}
+
+.company-symbol-list-row {
+    width: 100%;
+    min-height: 48px;
+    padding: 8px 12px;
+    border-bottom: 2px solid #232323;
+    box-sizing: border-box;
+}
+
+.company-symbol-list-row:last-child {
+    border-bottom: none;
+}
+
+.company-symbol-list-text {
+    font-size: 20px;
+    font-weight: 900;
+    color: #1f1f1f;
+}
+
+
+/* =========================
+   14. SYMBOL DELETE BUTTON
+   ========================= */
+
+.company-symbol-delete-button {
+    background: #ff6666;
+    color: #1f1f1f;
+    border: 3px solid #232323;
+    border-radius: 14px;
+    font-weight: 800;
+    height: 40px;
+    padding: 0 14px;
+    cursor: pointer;
+    box-shadow: none;
+}
+
+.company-symbol-delete-button:hover {
+    background: #f45f5f;
+}
+
+.company-symbol-delete-button[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+
+/* =========================
+   15. RESPONSIVE
+   ========================= */
+
+@media (max-width: 900px) {
+    .company-page {
+        padding: 16px;
+    }
+
+    .company-shell {
+        padding: 18px;
+    }
+
+    .company-form-content {
+        max-width: 100%;
+        margin-top: 40px;
+    }
+
+    .company-field-info-row,
+    .company-symbol-row {
+        width: 100%;
+        gap: 10px;
+    }
+
+    .company-field-info-row .company-form-input,
+    .company-symbol-row .company-form-input,
+    .company-form-input {
+        width: 100%;
+    }
+
+    .company-title-tooltip {
+        left: auto;
+        right: 0;
+        top: 36px;
+        transform: none;
+        width: 280px;
+    }
+
+    .company-symbol-dialog-content {
+        width: 320px;
+    }
 }
