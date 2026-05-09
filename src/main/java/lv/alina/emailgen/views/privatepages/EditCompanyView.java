@@ -3,6 +3,7 @@ package lv.alina.emailgen.views.privatepages;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -13,8 +14,10 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.Autocomplete;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -36,7 +39,6 @@ import lv.alina.emailgen.service.ISymbolService;
 @CssImport("./styles/company-view.css")
 public class EditCompanyView extends VerticalLayout implements BeforeEnterObserver {
 
-	// TODO
 	private final ICRUDCompanyService companyService;
     private final ICRUDMainEmailService mainEmailService;
     private final ISymbolService symbolService;
@@ -44,26 +46,27 @@ public class EditCompanyView extends VerticalLayout implements BeforeEnterObserv
     private Company currentCompany;
 
     private TextField companyNameField;
+    private TextField shortCodeField;
     private TextArea notesField;
+
     private ComboBox<MainEmail> defaultMainEmailBox;
     private ComboBox<Symbol> symbolBeforeShortcodeBox;
     private ComboBox<Symbol> symbolBeforeSequenceBox;
-    private TextField shortCodeField;
+
     private Span previewText;
 
     public EditCompanyView(ICRUDCompanyService companyService, ICRUDMainEmailService mainEmailService, ISymbolService symbolService) {
         this.companyService = companyService;
         this.mainEmailService = mainEmailService;
         this.symbolService = symbolService;
-
         buildLayout();
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        User user = VaadinSession.getCurrent().getAttribute(User.class);
+        User loggedInUser = VaadinSession.getCurrent().getAttribute(User.class);
 
-        if (user == null) {
+        if (loggedInUser == null) {
             event.forwardTo("login");
             return;
         }
@@ -86,13 +89,14 @@ public class EditCompanyView extends VerticalLayout implements BeforeEnterObserv
 
         currentCompany = companyOptional.get();
 
-        if (!currentCompany.getUser().getUserId().equals(user.getUserId())) {
+        if (!currentCompany.getUser().getUserId().equals(loggedInUser.getUserId())) {
             Notification.show("Access denied");
             event.forwardTo("companies");
             return;
         }
-        loadMainEmails(user);
-        loadSymbols(user);
+
+        loadMainEmails(loggedInUser);
+        loadSymbols(loggedInUser);
         fillForm();
         updatePreview();
     }
@@ -100,73 +104,88 @@ public class EditCompanyView extends VerticalLayout implements BeforeEnterObserv
     private void buildLayout() {
         addClassName("company-page");
         setSizeFull();
+        setPadding(false);
+        setSpacing(false);
         setAlignItems(Alignment.CENTER);
 
         VerticalLayout shell = new VerticalLayout();
         shell.addClassName("company-shell");
+        shell.setPadding(false);
+        shell.setSpacing(false);
 
-        HorizontalLayout topBar = new HorizontalLayout();
-        topBar.addClassName("company-topbar");
-        topBar.setWidthFull();
-        topBar.setJustifyContentMode(JustifyContentMode.BETWEEN);
-
-        Button backButton = new Button("BACK");
-        backButton.addClassName("company-menu-button");
-        backButton.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate("companies")));
-
-        topBar.add(backButton);
+        HorizontalLayout topBar = createTopBar();
 
         VerticalLayout form = new VerticalLayout();
+        form.addClassName("company-form-content");
+        form.setPadding(false);
+        form.setSpacing(false);
         form.setAlignItems(Alignment.CENTER);
 
-        Span title = new Span("Edit company");
-        title.addClassName("company-form-title");
+        HorizontalLayout titleRow = createTitleRow();
 
         companyNameField = new TextField("Company name");
         companyNameField.setRequiredIndicatorVisible(true);
+        companyNameField.setPlaceholder("Company name");
+        companyNameField.setAutocomplete(Autocomplete.OFF);
         companyNameField.addClassName("company-form-input");
+        HorizontalLayout companyNameRow = createInfoRow(companyNameField, "Company name is only used to help you identify the system or website you are testing. It does not affect generated e-mail addresses.");
+
+        shortCodeField = new TextField("Short code");
+        shortCodeField.setPlaceholder("Short code");
+        shortCodeField.setAutocomplete(Autocomplete.OFF);
+        shortCodeField.addClassName("company-form-input");
+        shortCodeField.setValueChangeMode(ValueChangeMode.EAGER);
+        shortCodeField.addValueChangeListener(event -> updatePreview());
+        HorizontalLayout shortCodeRow = createInfoRow(shortCodeField, "Short code will be included in generated e-mail addresses. Leave it empty if you want to generate addresses without a short code.");
 
         notesField = new TextArea("Notes");
+        notesField.setPlaceholder("Notes");
+        notesField.setAutocomplete(Autocomplete.OFF);
         notesField.addClassName("company-form-input");
 
         defaultMainEmailBox = new ComboBox<>("Default main e-mail");
+        defaultMainEmailBox.setPlaceholder("Select default main e-mail");
         defaultMainEmailBox.setItemLabelGenerator(MainEmail::getMainEmail);
-        defaultMainEmailBox.addClassName("company-form-input");
         defaultMainEmailBox.setAllowCustomValue(false);
-        defaultMainEmailBox.addValueChangeListener(e -> updatePreview());
+        defaultMainEmailBox.addClassName("company-form-input");
+        defaultMainEmailBox.addValueChangeListener(event -> updatePreview());
+        HorizontalLayout defaultMainEmailRow = createInfoRow(defaultMainEmailBox, "This e-mail will be offered first when generating addresses for this company. You can still choose any other main e-mail during generation.");
 
         symbolBeforeShortcodeBox = new ComboBox<>("Symbol before short code");
+        symbolBeforeShortcodeBox.setPlaceholder("None");
+        symbolBeforeShortcodeBox.addClassName("company-form-input");
         symbolBeforeShortcodeBox.setItemLabelGenerator(Symbol::getSymbol);
         symbolBeforeShortcodeBox.setClearButtonVisible(true);
-        symbolBeforeShortcodeBox.addValueChangeListener(e -> updatePreview());
-
-        HorizontalLayout symbolRow1 = createSymbolRow(symbolBeforeShortcodeBox);
-
-        shortCodeField = new TextField("Short code");
-        shortCodeField.addClassName("company-form-input");
-        shortCodeField.addValueChangeListener(e -> updatePreview());
+        symbolBeforeShortcodeBox.addValueChangeListener(event -> updatePreview());
+        HorizontalLayout symbolBeforeShortcodeRow = createSymbolRow(symbolBeforeShortcodeBox, "Symbol before short code is added before the short code in generated addresses.");
 
         symbolBeforeSequenceBox = new ComboBox<>("Symbol before sequence");
+        symbolBeforeSequenceBox.setPlaceholder("None");
+        symbolBeforeSequenceBox.addClassName("company-form-input");
         symbolBeforeSequenceBox.setItemLabelGenerator(Symbol::getSymbol);
         symbolBeforeSequenceBox.setClearButtonVisible(true);
-        symbolBeforeSequenceBox.addValueChangeListener(e -> updatePreview());
+        symbolBeforeSequenceBox.addValueChangeListener(event -> updatePreview());
+        HorizontalLayout symbolBeforeSequenceRow = createSymbolRow(symbolBeforeSequenceBox, "Symbol before sequence is added before the number, for example before 001.");
 
-        HorizontalLayout symbolRow2 = createSymbolRow(symbolBeforeSequenceBox);
+        Button manageSymbolsButton = new Button("MANAGE SYMBOLS");
+        manageSymbolsButton.addClassName("company-manage-symbols-button");
+        manageSymbolsButton.addClickListener(event -> openManageSymbolsDialog());
 
-        previewText = new Span();
+        previewText = new Span("Example: -");
         previewText.addClassName("company-preview");
 
         Button saveButton = new Button("SAVE");
         saveButton.addClassName("company-add-button");
-        saveButton.addClickListener(e -> updateCompany());
+        saveButton.addClickListener(event -> updateCompany());
 
-        form.add(title,
-        		companyNameField,
+        form.add(titleRow,
+                companyNameRow,
+                shortCodeRow,
                 notesField,
-                defaultMainEmailBox,
-                symbolRow1,
-                shortCodeField,
-                symbolRow2,
+                defaultMainEmailRow,
+                symbolBeforeShortcodeRow,
+                symbolBeforeSequenceRow,
+                manageSymbolsButton,
                 previewText,
                 saveButton
         );
@@ -175,94 +194,44 @@ public class EditCompanyView extends VerticalLayout implements BeforeEnterObserv
         add(shell);
     }
 
-    private HorizontalLayout createSymbolRow(ComboBox<Symbol> symbolBox) {
-        Button addButton = new Button("+");
-        addButton.addClassName("company-symbol-small-button");
-        addButton.addClickListener(e -> openAddSymbolDialog());
+    private HorizontalLayout createTopBar() {
+        HorizontalLayout topBar = new HorizontalLayout();
+        topBar.addClassName("company-topbar");
+        topBar.setWidthFull();
+        topBar.setAlignItems(Alignment.CENTER);
+        topBar.setJustifyContentMode(JustifyContentMode.BETWEEN);
 
-        Button deleteButton = new Button("DEL");
-        deleteButton.addClassName("company-symbol-delete-button");
-        deleteButton.addClickListener(e -> deleteSymbol(symbolBox));
+        Button menuButton = new Button("MENU");
+        menuButton.addClassName("company-menu-button");
+        menuButton.addClickListener(event -> getUI().ifPresent(ui -> ui.navigate("main")));
 
-        HorizontalLayout row = new HorizontalLayout(symbolBox, addButton, deleteButton);
-        row.addClassName("company-symbol-row");
-        row.setAlignItems(Alignment.END);
+        Button backButton = new Button("BACK");
+        backButton.addClassName("company-menu-button");
+        backButton.addClickListener(event -> getUI().ifPresent(ui -> ui.navigate("companies")));
 
-        return row;
+        topBar.add(menuButton, backButton);
+        return topBar;
     }
 
-    private void openAddSymbolDialog() {
-        Dialog dialog = new Dialog();
-        dialog.addClassName("company-symbol-dialog");
+    private HorizontalLayout createTitleRow() {
+        HorizontalLayout titleRow = new HorizontalLayout();
+        titleRow.setAlignItems(Alignment.CENTER);
+        titleRow.setSpacing(true);
 
-        TextField symbolField = new TextField("Symbol");
-        symbolField.addClassName("company-form-input");
+        Span title = new Span("Edit company");
+        title.addClassName("company-form-title");
 
-        Button saveButton = new Button("SAVE");
-        saveButton.addClassName("company-add-button");
-        saveButton.addClickListener(e -> {
-            User user = VaadinSession.getCurrent().getAttribute(User.class);
+        Span titleInfo = new Span("!");
+        titleInfo.addClassName("company-title-info-icon");
 
-            if (user == null) {
-                getUI().ifPresent(ui -> ui.navigate("login"));
-                return;
-            }
+        Span titleTooltip = new Span("Company represents a separate system, website or platform that you are testing.");
+        titleTooltip.addClassName("company-title-tooltip");
 
-            try {
-                symbolService.createSymbol(user, symbolField.getValue());
-                loadSymbols(user);
-                updatePreview();
+        HorizontalLayout titleInfoWrapper = new HorizontalLayout(titleInfo, titleTooltip);
+        titleInfoWrapper.addClassName("company-title-info-wrapper");
 
-                dialog.close();
-                Notification.show("Symbol added");
-            } catch (Exception ex) {
-                Notification.show(ex.getMessage());
-            }
-        });
-
-        Button cancelButton = new Button("CANCEL");
-        cancelButton.addClassName("company-menu-button");
-        cancelButton.addClickListener(e -> dialog.close());
-
-        HorizontalLayout buttons = new HorizontalLayout(cancelButton, saveButton);
-        buttons.addClassName("company-symbol-dialog-buttons");
-
-        VerticalLayout content = new VerticalLayout(symbolField, buttons);
-        content.addClassName("company-symbol-dialog-content");
-        content.setPadding(false);
-        content.setSpacing(false);
-        content.setAlignItems(Alignment.CENTER);
-
-        dialog.add(content);
-        dialog.open();
-    }
-
-    private void deleteSymbol(ComboBox<Symbol> symbolBox) {
-        Symbol selectedSymbol = symbolBox.getValue();
-
-        if (selectedSymbol == null) {
-            Notification.show("Select symbol first");
-            return;
-        }
-
-        User user = VaadinSession.getCurrent().getAttribute(User.class);
-
-        if (user == null) {
-            getUI().ifPresent(ui -> ui.navigate("login"));
-            return;
-        }
-
-        try {
-            symbolService.deleteSymbol(selectedSymbol);
-
-            loadSymbols(user);
-            symbolBox.clear();
-            updatePreview();
-
-            Notification.show("Symbol deleted");
-        } catch (Exception e) {
-            Notification.show(e.getMessage());
-        }
+        titleRow.add(title, titleInfoWrapper);
+        return titleRow;
     }
 
     private void loadMainEmails(User user) {
@@ -316,29 +285,37 @@ public class EditCompanyView extends VerticalLayout implements BeforeEnterObserv
             return;
         }
 
-        MainEmail mainEmail = defaultMainEmailBox.getValue();
+        MainEmail selectedMainEmail = defaultMainEmailBox.getValue();
 
-        if (mainEmail == null || mainEmail.getMainEmail() == null) {
-            previewText.setText("Example: -");
+        if (selectedMainEmail == null || selectedMainEmail.getMainEmail() == null) {
+            previewText.setText("Example: select main e-mail first");
             return;
         }
 
-        if (!mainEmail.getMainEmail().contains("@")) {
+        String mainEmail = selectedMainEmail.getMainEmail();
+
+        if (!mainEmail.contains("@")) {
             previewText.setText("Example: invalid main e-mail");
             return;
         }
 
-        String[] parts = mainEmail.getMainEmail().split("@", 2);
+        String[] parts = mainEmail.split("@", 2);
 
-        Symbol symbol1 = symbolBeforeShortcodeBox.getValue();
-        Symbol symbol2 = symbolBeforeSequenceBox.getValue();
+        String localPart = parts[0];
+        String domainPart = parts[1];
 
-        String symbolBeforeShortcode = getSymbolValue(symbol1);
-        String symbolBeforeSequence = getSymbolValue(symbol2);
-        String shortCode = getTextValue(shortCodeField);
+        String symbolBeforeShortcode = getSymbolValue(symbolBeforeShortcodeBox.getValue());
 
-        String example = parts[0] + symbolBeforeShortcode + shortCode + symbolBeforeSequence + "001@" + parts[1];
+        String shortCode = shortCodeField.getValue();
+        if (shortCode == null) {
+            shortCode = "";
+        } else {
+            shortCode = shortCode.trim();
+        }
 
+        String symbolBeforeSequence = getSymbolValue(symbolBeforeSequenceBox.getValue());
+
+        String example = localPart + symbolBeforeShortcode + shortCode + symbolBeforeSequence + "001@" + domainPart;
         previewText.setText("Example: " + example);
     }
 
@@ -361,26 +338,162 @@ public class EditCompanyView extends VerticalLayout implements BeforeEnterObserv
 
             Notification.show("Company updated");
             getUI().ifPresent(ui -> ui.navigate("companies"));
+
         } catch (Exception e) {
             Notification.show(e.getMessage());
         }
+    }
+
+    private HorizontalLayout createInfoRow(Component field, String text) {
+        Span infoIcon = new Span("!");
+        infoIcon.addClassName("company-title-info-icon");
+
+        Span tooltip = new Span(text);
+        tooltip.addClassName("company-title-tooltip");
+
+        HorizontalLayout infoWrapper = new HorizontalLayout(infoIcon, tooltip);
+        infoWrapper.addClassName("company-title-info-wrapper");
+
+        HorizontalLayout row = new HorizontalLayout(field, infoWrapper);
+        row.addClassName("company-field-info-row");
+        row.setAlignItems(Alignment.END);
+        return row;
+    }
+
+    private HorizontalLayout createSymbolRow(ComboBox<Symbol> box, String tooltipText) {
+        Span infoIcon = new Span("!");
+        infoIcon.addClassName("company-title-info-icon");
+
+        Span tooltip = new Span(tooltipText);
+        tooltip.addClassName("company-title-tooltip");
+
+        HorizontalLayout infoWrapper = new HorizontalLayout(infoIcon, tooltip);
+        infoWrapper.addClassName("company-title-info-wrapper");
+
+        HorizontalLayout row = new HorizontalLayout(box, infoWrapper);
+        row.addClassName("company-symbol-row");
+        row.setAlignItems(Alignment.END);
+
+        return row;
+    }
+
+    private void openManageSymbolsDialog() {
+        Dialog dialog = new Dialog();
+        dialog.addClassName("company-symbol-dialog");
+
+        User user = VaadinSession.getCurrent().getAttribute(User.class);
+
+        if (user == null) {
+            getUI().ifPresent(ui -> ui.navigate("login"));
+            return;
+        }
+
+        TextField symbolField = new TextField("New symbol");
+        symbolField.setPlaceholder("Enter symbol");
+        symbolField.setAutocomplete(Autocomplete.OFF);
+        symbolField.addClassName("company-form-input");
+
+        VerticalLayout symbolList = new VerticalLayout();
+        symbolList.addClassName("company-symbol-list");
+        symbolList.setPadding(false);
+        symbolList.setSpacing(false);
+
+        refreshSymbolList(symbolList, user);
+
+        Button addButton = new Button("ADD");
+        addButton.addClassName("company-add-button");
+        addButton.addClickListener(event -> {
+            try {
+                symbolService.createSymbol(user, symbolField.getValue());
+                symbolField.clear();
+                loadSymbols(user);
+                refreshSymbolList(symbolList, user);
+                updatePreview();
+                Notification.show("Symbol added");
+
+            } catch (Exception e) {
+                Notification.show(e.getMessage());
+            }
+        });
+
+        Button closeButton = new Button("CLOSE");
+        closeButton.addClassName("company-menu-button");
+        closeButton.addClickListener(event -> dialog.close());
+
+        HorizontalLayout buttons = new HorizontalLayout(addButton, closeButton);
+        buttons.addClassName("company-symbol-dialog-buttons");
+
+        VerticalLayout content = new VerticalLayout(symbolField, symbolList, buttons);
+
+        content.addClassName("company-symbol-dialog-content");
+        content.setPadding(false);
+        content.setSpacing(false);
+        content.setAlignItems(Alignment.CENTER);
+
+        dialog.add(content);
+        dialog.open();
+    }
+
+    private void refreshSymbolList(VerticalLayout symbolList, User user) {
+        symbolList.removeAll();
+
+        ArrayList<Symbol> symbols = symbolService.getSymbolsForUser(user);
+
+        for (Symbol symbol : symbols) {
+            HorizontalLayout row = new HorizontalLayout();
+            row.addClassName("company-symbol-list-row");
+            row.setAlignItems(Alignment.CENTER);
+
+            Span symbolText = new Span(symbol.getSymbol());
+            symbolText.addClassName("company-symbol-list-text");
+
+            Button deleteButton = new Button("DELETE");
+            deleteButton.addClassName("company-symbol-delete-button");
+
+            if (isDefaultSymbol(symbol)) {
+                deleteButton.setEnabled(false);
+            }
+
+            deleteButton.addClickListener(event -> {
+                try {
+                    symbolService.deleteSymbol(symbol);
+
+                    loadSymbols(user);
+                    refreshSymbolList(symbolList, user);
+
+                    symbolBeforeShortcodeBox.clear();
+                    symbolBeforeSequenceBox.clear();
+
+                    updatePreview();
+
+                    Notification.show("Symbol deleted");
+
+                } catch (Exception e) {
+                    Notification.show(e.getMessage());
+                }
+            });
+
+            row.add(symbolText, deleteButton);
+            row.expand(symbolText);
+
+            symbolList.add(row);
+        }
+    }
+
+    private boolean isDefaultSymbol(Symbol symbol) {
+        if (symbol == null || symbol.getSymbol() == null) {
+            return true;
+        }
+
+        String value = symbol.getSymbol();
+
+        return "+".equals(value) || "-".equals(value);
     }
 
     private String getSymbolValue(Symbol symbol) {
         if (symbol == null) {
             return "";
         }
-
         return symbol.getSymbol();
-    }
-
-    private String getTextValue(TextField field) {
-        String value = field.getValue();
-
-        if (value == null) {
-            return "";
-        }
-
-        return value.trim();
     }
 }
