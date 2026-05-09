@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lv.alina.emailgen.models.MainEmail;
 import lv.alina.emailgen.models.User;
+import lv.alina.emailgen.models.enums.VerificationCodeStatus;
 import lv.alina.emailgen.repos.ICompanyRepo;
 import lv.alina.emailgen.repos.IDeletedGeneratedEmailRepo;
 import lv.alina.emailgen.repos.IGeneratedEmailRepo;
@@ -19,6 +20,8 @@ import lv.alina.emailgen.repos.IShortCodesRepo;
 import lv.alina.emailgen.repos.ISymbolRepo;
 import lv.alina.emailgen.repos.IUserRepo;
 import lv.alina.emailgen.service.ICRUDUserService;
+import lv.alina.emailgen.service.IEmailService;
+import lv.alina.emailgen.service.IRegistrationVerificationService;
 
 @Service
 public class CRUDUserServiceImpl implements ICRUDUserService{
@@ -32,9 +35,14 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
 	private final ICompanyRepo companyRepo;
 	private final IShortCodesRepo shortCodesRepo;
 	private final ISymbolRepo symbolRepo;
+	private final IRegistrationVerificationService verificationService;
+	private final IEmailService emailService;
 	
 	
-	public CRUDUserServiceImpl(IUserRepo userRepo, IMainEmailRepo mainEmailRepo, PasswordEncoder passwordEncoder, IGeneratedEmailRepo generatedEmailRepo, IDeletedGeneratedEmailRepo deletedGeneratedEmailRepo, IMainEmailHistoryRepo mainEmailHistoryRepo, ICompanyRepo companyRepo,IShortCodesRepo shortCodesRepo, ISymbolRepo symbolRepo ) {
+	public CRUDUserServiceImpl(IUserRepo userRepo, IMainEmailRepo mainEmailRepo, PasswordEncoder passwordEncoder, 
+			IGeneratedEmailRepo generatedEmailRepo, IDeletedGeneratedEmailRepo deletedGeneratedEmailRepo, 
+			IMainEmailHistoryRepo mainEmailHistoryRepo, ICompanyRepo companyRepo,IShortCodesRepo shortCodesRepo, 
+			ISymbolRepo symbolRepo, IRegistrationVerificationService verificationService, IEmailService emailService ) {
 		
         this.userRepo = userRepo;
         this.mainEmailRepo = mainEmailRepo;
@@ -45,6 +53,9 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
         this.companyRepo = companyRepo;
         this.shortCodesRepo = shortCodesRepo;
         this.symbolRepo = symbolRepo;
+        this.verificationService = verificationService;
+        this.emailService = emailService;
+        
     }
 
     @Override
@@ -248,6 +259,150 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
         String value = email.trim();
 
         return value.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+    }
+    
+    @Override
+    public User updateFullName(User user, String fullName) throws Exception {
+        if (user == null) {
+            throw new Exception("User is required");
+        }
+
+        User existingUser = userRepo.findById(user.getUserId()).orElseThrow(() -> new Exception("User not found"));
+
+        if (fullName == null || fullName.isBlank()) {
+            existingUser.setFullName(null);
+        } else {
+            existingUser.setFullName(fullName.trim());
+        }
+
+        return userRepo.save(existingUser);
+    }
+
+    @Override
+    public void changePassword(User user, String currentPassword, String newPassword, String repeatedPassword) throws Exception {
+        if (user == null) {
+            throw new Exception("User is required");
+        }
+
+        if (currentPassword == null || currentPassword.isBlank()) {
+            throw new Exception("Current password is required");
+        }
+
+        if (newPassword == null || newPassword.isBlank()) {
+            throw new Exception("New password is required");
+        }
+
+        if (repeatedPassword == null || repeatedPassword.isBlank()) {
+            throw new Exception("Repeat password is required");
+        }
+
+        if (!newPassword.equals(repeatedPassword)) {
+            throw new Exception("New passwords do not match");
+        }
+
+        if (newPassword.length() < 8) {
+            throw new Exception("New password must be at least 8 characters long");
+        }
+
+        User existingUser = userRepo.findById(user.getUserId()).orElseThrow(() -> new Exception("User not found"));
+
+        if (!passwordEncoder.matches(currentPassword, existingUser.getPasswordHash())) {
+            throw new Exception("Current password is incorrect");
+        }
+
+        if (passwordEncoder.matches(newPassword, existingUser.getPasswordHash())) {
+            throw new Exception("New password cannot be the same as current password");
+        }
+
+        String passwordHash = passwordEncoder.encode(newPassword);
+        existingUser.setPasswordHash(passwordHash);
+
+        userRepo.save(existingUser);
+    }
+    
+    @Override
+    public void requestEmailChange(User user, String currentPassword, String newEmail) throws Exception {
+        if (user == null) {
+            throw new Exception("User is required");
+        }
+
+        if (currentPassword == null || currentPassword.isBlank()) {
+            throw new Exception("Current password is required");
+        }
+
+        if (newEmail == null || newEmail.isBlank()) {
+            throw new Exception("New e-mail is required");
+        }
+
+        String normalizedNewEmail = newEmail.trim().toLowerCase();
+
+        if (!isEmailFormatValid(normalizedNewEmail)) {
+            throw new Exception("Please enter a valid e-mail address");
+        }
+
+        User existingUser = userRepo.findById(user.getUserId()).orElseThrow(() -> new Exception("User not found"));
+
+        if (!passwordEncoder.matches(currentPassword, existingUser.getPasswordHash())) {
+            throw new Exception("Current password is incorrect");
+        }
+
+        if (existingUser.getEmail().equalsIgnoreCase(normalizedNewEmail)) {
+            throw new Exception("New e-mail cannot be the same as current e-mail");
+        }
+
+        if (userRepo.existsByEmail(normalizedNewEmail)) {
+            throw new Exception("User with this e-mail already exists");
+        }
+
+        if (!verificationService.canResendCode(normalizedNewEmail)) {
+            int seconds = verificationService.getRemainingResendCooldownSeconds(normalizedNewEmail);
+            throw new Exception("Please wait " + seconds + " seconds before requesting a new code");
+        }
+
+        String code = verificationService.createAndStoreCode(normalizedNewEmail);
+
+        emailService.sendVerificationCode(normalizedNewEmail, code);
+    }
+
+    @Override
+    public User confirmEmailChange(User user, String newEmail, String code) throws Exception {
+        if (user == null) {
+            throw new Exception("User is required");
+        }
+
+        if (newEmail == null || newEmail.isBlank()) {
+            throw new Exception("New e-mail is required");
+        }
+
+        if (code == null || code.isBlank()) {
+            throw new Exception("Verification code is required");
+        }
+
+        String normalizedNewEmail = newEmail.trim().toLowerCase();
+        
+        if (!isEmailFormatValid(normalizedNewEmail)) {
+            throw new Exception("Please enter a valid e-mail address");
+        }
+
+        VerificationCodeStatus status = verificationService.getCodeStatus(normalizedNewEmail, code.trim());
+
+        if (status != VerificationCodeStatus.VALID) {
+            throw new Exception("Verification code is invalid or expired");
+        }
+
+        if (userRepo.existsByEmail(normalizedNewEmail)) {
+            throw new Exception("User with this e-mail already exists");
+        }
+
+        User existingUser = userRepo.findById(user.getUserId()).orElseThrow(() -> new Exception("User not found"));
+
+        existingUser.setEmail(normalizedNewEmail);
+
+        User savedUser = userRepo.save(existingUser);
+
+        verificationService.removeCode(normalizedNewEmail);
+
+        return savedUser;
     }
 
 }

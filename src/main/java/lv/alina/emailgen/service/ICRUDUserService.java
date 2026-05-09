@@ -26,5 +26,13 @@ public interface ICRUDUserService {
     void updatePasswordByEmail(String email, String newRawPassword) throws Exception;
     
     boolean isPasswordCorrect(User user, String rawPassword) throws Exception;
+    
+    User updateFullName(User user, String fullName) throws Exception;
+
+    void changePassword(User user, String currentPassword, String newPassword, String repeatedPassword) throws Exception;
+    
+    void requestEmailChange(User user, String currentPassword, String newEmail) throws Exception;
+
+    User confirmEmailChange(User user, String newEmail, String code) throws Exception;
 
 }

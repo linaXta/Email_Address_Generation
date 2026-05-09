@@ -51,11 +51,11 @@ public class MainView extends VerticalLayout implements BeforeEnterObserver {
         );
 
         generatorButton.addClickListener(event ->
-                Notification.show("E-mail generator page will be added later.")
+        	Notification.show("E-mail generator page will be added later.")
         );
 
         profileButton.addClickListener(event ->
-                Notification.show("Profile page will be added later.")
+        	getUI().ifPresent(ui -> ui.navigate("profile"))
         );
 
         logoutButton.addClickListener(event -> {
