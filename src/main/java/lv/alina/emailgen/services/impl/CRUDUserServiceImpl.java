@@ -105,9 +105,18 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
         }
         
         List<Company> companies = companyRepo.findByUser(user);
-
+        
         for (Company company : companies) {
+
             generatedEmailRepo.deleteByCompany(company);
+
+            company.setCurrentShortCode(null);
+            company.setDefaultMainEmail(null);
+            company.setSymbolBeforeShortcode(null);
+            company.setSymbolBeforeSequence(null);
+
+            companyRepo.save(company);
+
             shortCodeCounterRepo.deleteByCompany(company);
         }
         
@@ -273,7 +282,9 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
             return false;
         }
 
-        return passwordEncoder.matches(rawPassword, user.getPasswordHash());
+        User existingUser = userRepo.findById(user.getUserId()).orElseThrow(() -> new Exception("User not found"));
+
+        return passwordEncoder.matches(rawPassword, existingUser.getPasswordHash());
     }
     
     private boolean isEmailFormatValid(String email) {

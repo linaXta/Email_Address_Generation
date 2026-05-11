@@ -188,3 +188,23 @@
     width: 220px;
     margin-top: 0;
 }
+
+.profile-warning-text {
+    width: 460px;
+    color: #b80000;
+    background: #ffe2d4;
+    border: 2px solid #b80000;
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-sizing: border-box;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.35;
+    text-align: center;
+}
+
+.profile-delete-buttons .profile-danger-button,
+.profile-delete-buttons .profile-secondary-button {
+    width: 220px;
+    margin-top: 0;
+}

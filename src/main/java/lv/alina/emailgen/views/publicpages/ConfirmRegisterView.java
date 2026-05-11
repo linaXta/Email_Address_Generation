@@ -8,6 +8,7 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.Autocomplete;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -131,6 +132,9 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
         form.addClassName("auth-form");
 
         verificationCodeField = new TextField("Verification code");
+        verificationCodeField.setAutocomplete(Autocomplete.OFF);
+        verificationCodeField.getElement().setAttribute("name", "registration-verification-code");
+        verificationCodeField.getElement().setAttribute("id", "registration-verification-code");
         verificationCodeField.setPlaceholder("Enter verification code");
         verificationCodeField.setWidthFull();
         verificationCodeField.addClassName("auth-field");

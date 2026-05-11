@@ -404,9 +404,22 @@ public class EditCompanyView extends VerticalLayout implements BeforeEnterObserv
         addButton.addClassName("company-add-button");
         addButton.addClickListener(event -> {
             try {
+            	
+            	Symbol selectedBeforeShortCode = symbolBeforeShortcodeBox.getValue();
+                Symbol selectedBeforeSequence = symbolBeforeSequenceBox.getValue();
+                
                 symbolService.createSymbol(user, symbolField.getValue());
                 symbolField.clear();
                 loadSymbols(user);
+                
+                if (selectedBeforeShortCode != null) {
+                    symbolBeforeShortcodeBox.setValue(selectedBeforeShortCode);
+                }
+
+                if (selectedBeforeSequence != null) {
+                    symbolBeforeSequenceBox.setValue(selectedBeforeSequence);
+                }
+                
                 refreshSymbolList(symbolList, user);
                 updatePreview();
                 Notification.show("Symbol added");

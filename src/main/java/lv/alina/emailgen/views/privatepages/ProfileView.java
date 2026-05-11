@@ -1,6 +1,7 @@
 package lv.alina.emailgen.views.privatepages;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
@@ -150,7 +151,7 @@ public class ProfileView extends VerticalLayout implements BeforeEnterObserver {
 
         Button deleteAccountButton = new Button("DELETE ACCOUNT");
         deleteAccountButton.addClassName("profile-danger-button");
-        deleteAccountButton.addClickListener(event -> Notification.show("Account deletion will be added later"));
+        deleteAccountButton.addClickListener(event -> openDeleteAccountDialog());
 
         card.add(cardTitle, changePasswordButton, enable2faButton, deleteAccountButton);
         return card;
@@ -331,6 +332,77 @@ public class ProfileView extends VerticalLayout implements BeforeEnterObserver {
         buttons.setJustifyContentMode(JustifyContentMode.CENTER);
 
         VerticalLayout content = new VerticalLayout(title, currentPasswordField, newEmailField, codeField, buttons);
+
+        content.addClassName("profile-dialog-content");
+        content.setPadding(false);
+        content.setSpacing(false);
+        content.setAlignItems(Alignment.CENTER);
+
+        dialog.add(content);
+        dialog.open();
+    }
+    
+    private void openDeleteAccountDialog() {
+        Dialog dialog = new Dialog();
+        dialog.addClassName("profile-dialog");
+
+        Span title = new Span("Delete account");
+        title.addClassName("profile-dialog-title");
+
+        Span warning = new Span("This will permanently delete your account and all related data. This action cannot be undone.");
+        warning.addClassName("profile-warning-text");
+        
+        Checkbox confirmCheckbox = new Checkbox("I understand that this action cannot be undone");
+        confirmCheckbox.addClassName("profile-delete-checkbox");
+
+        PasswordField passwordField = new PasswordField("Current password");
+        passwordField.setPlaceholder("Current password");
+        passwordField.addClassName("profile-input");
+        passwordField.getElement().setAttribute("autocomplete", "new-password");
+        passwordField.getElement().setAttribute("name", "profile-delete-account-password");
+        passwordField.getElement().setAttribute("id", "profile-delete-account-password");
+
+        Button deleteButton = new Button("DELETE ACCOUNT");
+        deleteButton.addClassName("profile-danger-button");
+        deleteButton.addClickListener(event -> {
+            try {
+            	if (!confirmCheckbox.getValue()) {
+                    Notification.show("Please confirm that you understand this action cannot be undone");
+                    return;
+                }
+            	
+                if (!userService.isPasswordCorrect(loggedInUser, passwordField.getValue())) {
+                    Notification.show("Current password is incorrect");
+                    return;
+                }         
+
+                Long userId = loggedInUser.getUserId();
+
+                userService.deleteById(userId);
+
+                VaadinSession.getCurrent().setAttribute(User.class, null);
+
+                dialog.close();
+
+                Notification.show("Account deleted");
+                getUI().ifPresent(ui -> ui.navigate("login"));
+
+            } catch (Exception e) {
+                Notification.show(e.getMessage());
+            }
+        });
+
+        Button cancelButton = new Button("CANCEL");
+        cancelButton.addClassName("profile-secondary-button");
+        cancelButton.addClickListener(event -> dialog.close());
+
+        HorizontalLayout buttons = new HorizontalLayout(deleteButton, cancelButton);
+        buttons.addClassName("profile-delete-buttons");
+        buttons.setWidthFull();
+        buttons.setAlignItems(Alignment.CENTER);
+        buttons.setJustifyContentMode(JustifyContentMode.CENTER);
+
+        VerticalLayout content = new VerticalLayout(title, warning, confirmCheckbox, passwordField, buttons);
 
         content.addClassName("profile-dialog-content");
         content.setPadding(false);
