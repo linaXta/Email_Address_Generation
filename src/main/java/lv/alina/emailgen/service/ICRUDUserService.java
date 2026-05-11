@@ -35,4 +35,7 @@ public interface ICRUDUserService {
 
     User confirmEmailChange(User user, String newEmail, String code) throws Exception;
 
+    void requestAccountDeletion(User user, String currentPassword) throws Exception;
+
+    void confirmAccountDeletion(User user, String code) throws Exception;
 }

@@ -18,6 +18,8 @@ public interface IGeneratedEmailRepo extends CrudRepository<GeneratedEmail, Long
 	
 	void deleteByMainEmail(MainEmail mainEmail);
 	
+	void deleteByCompany(Company company);
+	
 	ArrayList<GeneratedEmail> findByCompany(Company company);
 
 }

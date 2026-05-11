@@ -16,13 +16,13 @@ public class EmailServiceImpl implements IEmailService {
     }
 
     @Override
-    public void sendVerificationCode(String toEmail, String code) throws Exception {
+    public void sendVerificationCode(String toEmail, String subject, String messageText)  throws Exception {
 
         SimpleMailMessage message = new SimpleMailMessage();
 
         message.setTo(toEmail);
-        message.setSubject("Your verification code");
-        message.setText("Your email verification code is: " + code + "\n\n This code is valid for 10 minutes.");
+        message.setSubject(subject);
+        message.setText(messageText);
 
         mailSender.send(message);
     }

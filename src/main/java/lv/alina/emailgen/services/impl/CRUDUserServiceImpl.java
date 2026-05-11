@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lv.alina.emailgen.models.Company;
 import lv.alina.emailgen.models.MainEmail;
 import lv.alina.emailgen.models.User;
 import lv.alina.emailgen.models.enums.VerificationCodeStatus;
@@ -16,35 +17,52 @@ import lv.alina.emailgen.repos.IDeletedGeneratedEmailRepo;
 import lv.alina.emailgen.repos.IGeneratedEmailRepo;
 import lv.alina.emailgen.repos.IMainEmailHistoryRepo;
 import lv.alina.emailgen.repos.IMainEmailRepo;
+import lv.alina.emailgen.repos.IShortCodeCounterRepo;
 import lv.alina.emailgen.repos.IShortCodesRepo;
 import lv.alina.emailgen.repos.ISymbolRepo;
 import lv.alina.emailgen.repos.IUserRepo;
+import lv.alina.emailgen.service.IAccountDeletionVerificationService;
 import lv.alina.emailgen.service.ICRUDUserService;
 import lv.alina.emailgen.service.IEmailService;
-import lv.alina.emailgen.service.IRegistrationVerificationService;
+import lv.alina.emailgen.service.IVerificationCodeService;
 
 @Service
 public class CRUDUserServiceImpl implements ICRUDUserService{
 	
+	private final PasswordEncoder passwordEncoder;
+	
 	private final IUserRepo userRepo;
 	private final IMainEmailRepo mainEmailRepo;
-	private final PasswordEncoder passwordEncoder;
 	private final IGeneratedEmailRepo generatedEmailRepo;
 	private final IDeletedGeneratedEmailRepo deletedGeneratedEmailRepo;
 	private final IMainEmailHistoryRepo mainEmailHistoryRepo;
 	private final ICompanyRepo companyRepo;
 	private final IShortCodesRepo shortCodesRepo;
 	private final ISymbolRepo symbolRepo;
-	private final IRegistrationVerificationService verificationService;
+	private final IShortCodeCounterRepo shortCodeCounterRepo;
+
+	private final IVerificationCodeService verificationService;
 	private final IEmailService emailService;
+	private final IAccountDeletionVerificationService accountDeletionVerificationService;
 	
 	
-	public CRUDUserServiceImpl(IUserRepo userRepo, IMainEmailRepo mainEmailRepo, PasswordEncoder passwordEncoder, 
-			IGeneratedEmailRepo generatedEmailRepo, IDeletedGeneratedEmailRepo deletedGeneratedEmailRepo, 
-			IMainEmailHistoryRepo mainEmailHistoryRepo, ICompanyRepo companyRepo,IShortCodesRepo shortCodesRepo, 
-			ISymbolRepo symbolRepo, IRegistrationVerificationService verificationService, IEmailService emailService ) {
+	public CRUDUserServiceImpl(
+	        IUserRepo userRepo,
+	        IMainEmailRepo mainEmailRepo,
+	        PasswordEncoder passwordEncoder,
+	        IGeneratedEmailRepo generatedEmailRepo,
+	        IDeletedGeneratedEmailRepo deletedGeneratedEmailRepo,
+	        IMainEmailHistoryRepo mainEmailHistoryRepo,
+	        ICompanyRepo companyRepo,
+	        IShortCodesRepo shortCodesRepo,
+	        ISymbolRepo symbolRepo,
+	        IShortCodeCounterRepo shortCodeCounterRepo,
+	        IVerificationCodeService verificationService,
+	        IEmailService emailService,
+	        IAccountDeletionVerificationService accountDeletionVerificationService
+	) {
 		
-        this.userRepo = userRepo;
+		this.userRepo = userRepo;
         this.mainEmailRepo = mainEmailRepo;
         this.passwordEncoder = passwordEncoder;
         this.generatedEmailRepo = generatedEmailRepo;
@@ -53,8 +71,10 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
         this.companyRepo = companyRepo;
         this.shortCodesRepo = shortCodesRepo;
         this.symbolRepo = symbolRepo;
+        this.shortCodeCounterRepo = shortCodeCounterRepo;
         this.verificationService = verificationService;
         this.emailService = emailService;
+        this.accountDeletionVerificationService = accountDeletionVerificationService;
         
     }
 
@@ -65,11 +85,9 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
         return users;
     }
 
-
     @Override
     public User retrieveById(Long id) throws Exception {
-        return userRepo.findById(id)
-            .orElseThrow(() -> new Exception("User is not found with id = " + id));
+        return userRepo.findById(id).orElseThrow(() -> new Exception("User is not found with id = " + id));
     }
 
     
@@ -85,11 +103,18 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
             deletedGeneratedEmailRepo.deleteByMainEmail(mainEmail);
             mainEmailHistoryRepo.deleteByMainEmail(mainEmail);
         }
+        
+        List<Company> companies = companyRepo.findByUser(user);
 
+        for (Company company : companies) {
+            generatedEmailRepo.deleteByCompany(company);
+            shortCodeCounterRepo.deleteByCompany(company);
+        }
+        
         mainEmailRepo.deleteByUser(user);
-        companyRepo.deleteByUser(user);
         shortCodesRepo.deleteByUser(user);
         symbolRepo.deleteByUser(user);
+        companyRepo.deleteByUser(user);
 
         userRepo.delete(user);
     }
@@ -361,7 +386,11 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
 
         String code = verificationService.createAndStoreCode(normalizedNewEmail);
 
-        emailService.sendVerificationCode(normalizedNewEmail, code);
+        emailService.sendVerificationCode(normalizedNewEmail, "Confirm e-mail change",
+                "Your e-mail change confirmation code is: " + code
+                        + "\n\nThis code is valid for 10 minutes."
+                        + "\n\nIf you did not request this change, please ignore this email."
+        );
     }
 
     @Override
@@ -403,6 +432,47 @@ public class CRUDUserServiceImpl implements ICRUDUserService{
         verificationService.removeCode(normalizedNewEmail);
 
         return savedUser;
+    }
+    
+    @Override
+    public void requestAccountDeletion(User user, String currentPassword) throws Exception {
+        if (user == null) {
+            throw new Exception("User is required");
+        }
+
+        if (currentPassword == null || currentPassword.isBlank()) {
+            throw new Exception("Current password is required");
+        }
+
+        User existingUser = userRepo.findById(user.getUserId()).orElseThrow(() -> new Exception("User not found"));
+
+        if (!passwordEncoder.matches(currentPassword, existingUser.getPasswordHash())) {
+            throw new Exception("Current password is incorrect");
+        }
+
+        accountDeletionVerificationService.sendDeleteConfirmationCode(existingUser);
+    }
+    
+    @Override
+    @Transactional
+    public void confirmAccountDeletion(User user, String code) throws Exception {
+        if (user == null) {
+            throw new Exception("User is required");
+        }
+
+        if (code == null || code.isBlank()) {
+            throw new Exception("Verification code is required");
+        }
+
+        User existingUser = userRepo.findById(user.getUserId()).orElseThrow(() -> new Exception("User not found"));
+
+        boolean isCodeValid = accountDeletionVerificationService.verifyDeleteConfirmationCode(existingUser.getEmail(), code);
+
+        if (!isCodeValid) {
+            throw new Exception("Verification code is invalid or expired");
+        }
+
+        deleteById(existingUser.getUserId());
     }
 
 }

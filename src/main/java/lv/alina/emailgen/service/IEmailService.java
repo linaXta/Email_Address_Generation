@@ -2,6 +2,6 @@ package lv.alina.emailgen.service;
 
 public interface IEmailService {
 	
-	void sendVerificationCode(String toEmail, String code) throws Exception;
+	void sendVerificationCode(String toEmail, String subject, String messageText) throws Exception;
 
 }

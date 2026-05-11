@@ -18,7 +18,7 @@ import com.vaadin.flow.shared.Registration;
 import lv.alina.emailgen.models.enums.VerificationCodeStatus;
 import lv.alina.emailgen.service.ICRUDUserService;
 import lv.alina.emailgen.service.IEmailService;
-import lv.alina.emailgen.service.IRegistrationVerificationService;
+import lv.alina.emailgen.service.IVerificationCodeService;
 
 @Route("forgot-password/confirm")
 @PageTitle("Forgot Password Confirm")
@@ -26,7 +26,7 @@ import lv.alina.emailgen.service.IRegistrationVerificationService;
 public class ForgotPasswordConfirmView extends VerticalLayout implements BeforeEnterObserver {
 	
 	private final ICRUDUserService userService;
-    private final IRegistrationVerificationService verificationService;
+    private final IVerificationCodeService verificationService;
     private final IEmailService emailService;
 
     private String email;
@@ -39,7 +39,7 @@ public class ForgotPasswordConfirmView extends VerticalLayout implements BeforeE
     private long resendButtonEndTime;
     private Registration resendCountdownListener;
 
-    public ForgotPasswordConfirmView(ICRUDUserService userService, IRegistrationVerificationService verificationService, IEmailService emailService) {
+    public ForgotPasswordConfirmView(ICRUDUserService userService, IVerificationCodeService verificationService, IEmailService emailService) {
         this.userService = userService;
         this.verificationService = verificationService;
         this.emailService = emailService;
@@ -249,7 +249,10 @@ public class ForgotPasswordConfirmView extends VerticalLayout implements BeforeE
             }
 
             String newCode = verificationService.createAndStoreCode(email);
-            emailService.sendVerificationCode(email, newCode);
+            emailService.sendVerificationCode(email,  "Password reset confirmation code",
+                    "Your password reset confirmation code is: " + newCode + "\n\nThis code is valid for 10 minutes."
+                    + "\n\nIf you did not request a password reset, please ignore this email."
+            );
 
             verificationCodeField.clear();
             showSuccess("A new verification code was sent to " + email);

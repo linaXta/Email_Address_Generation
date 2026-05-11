@@ -16,7 +16,7 @@ import com.vaadin.flow.router.Route;
 
 import lv.alina.emailgen.service.ICRUDUserService;
 import lv.alina.emailgen.service.IEmailService;
-import lv.alina.emailgen.service.IRegistrationVerificationService;
+import lv.alina.emailgen.service.IVerificationCodeService;
 
 @Route("register")
 @PageTitle("Register")
@@ -24,7 +24,7 @@ import lv.alina.emailgen.service.IRegistrationVerificationService;
 public class RegisterView extends VerticalLayout{
 	
 	private final ICRUDUserService userService;
-	private final IRegistrationVerificationService verificationService;
+	private final IVerificationCodeService verificationService;
 	private final IEmailService emailService;
 
     private EmailField emailField;
@@ -35,7 +35,7 @@ public class RegisterView extends VerticalLayout{
     private boolean alreadyRegisteredState = false;
     private String alreadyRegisteredEmail;
 
-    public RegisterView(ICRUDUserService userService, IRegistrationVerificationService verificationService, IEmailService emailService) {
+    public RegisterView(ICRUDUserService userService, IVerificationCodeService verificationService, IEmailService emailService) {
         this.userService = userService;
         this.verificationService = verificationService;
         this.emailService = emailService;
@@ -150,7 +150,9 @@ public class RegisterView extends VerticalLayout{
 
             String normalizedEmail = normalize(email);
             String code = verificationService.createAndStoreCode(normalizedEmail);
-            emailService.sendVerificationCode(normalizedEmail, code);
+            emailService.sendVerificationCode(normalizedEmail, "Your verification code",
+                    "Your email verification code is: " + code + "\n\nThis code is valid for 10 minutes."
+            );
 
             getUI().ifPresent(ui -> ui.navigate("register/confirm?email=" + normalizedEmail));
             

@@ -21,7 +21,7 @@ import lv.alina.emailgen.models.User;
 import lv.alina.emailgen.models.enums.VerificationCodeStatus;
 import lv.alina.emailgen.service.ICRUDUserService;
 import lv.alina.emailgen.service.IEmailService;
-import lv.alina.emailgen.service.IRegistrationVerificationService;
+import lv.alina.emailgen.service.IVerificationCodeService;
 
 @Route("register/confirm")
 @PageTitle("Confirm Register")
@@ -29,7 +29,7 @@ import lv.alina.emailgen.service.IRegistrationVerificationService;
 public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterObserver{
 	
 	private final ICRUDUserService userService;
-	private final IRegistrationVerificationService verificationService;
+	private final IVerificationCodeService verificationService;
 	private final IEmailService emailService;
 	
 	private String email;
@@ -42,7 +42,7 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
     private long resendButtonEndTime;
     private Registration resendCountdownListener;
     
-    public ConfirmRegisterView(ICRUDUserService userService, IRegistrationVerificationService verificationService, IEmailService emailService) {
+    public ConfirmRegisterView(ICRUDUserService userService, IVerificationCodeService verificationService, IEmailService emailService) {
         this.userService = userService;
         this.verificationService = verificationService;
         this.emailService = emailService;
@@ -274,7 +274,9 @@ public class ConfirmRegisterView extends VerticalLayout implements BeforeEnterOb
             }        	
 
             String newCode = verificationService.createAndStoreCode(email);
-            emailService.sendVerificationCode(email, newCode);
+            emailService.sendVerificationCode(email, "Your verification code",
+            		"Your email verification code is: " + newCode + "\n\nThis code is valid for 10 minutes."
+            );
             
             verificationCodeField.clear();
 

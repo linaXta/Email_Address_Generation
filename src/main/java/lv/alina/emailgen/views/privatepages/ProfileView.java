@@ -252,11 +252,6 @@ public class ProfileView extends VerticalLayout implements BeforeEnterObserver {
         dialog.add(content);
         dialog.open();
     }
-
-    private void logout() {
-        VaadinSession.getCurrent().setAttribute(User.class, null);
-        getUI().ifPresent(ui -> ui.navigate("login"));
-    }
     
     private void openChangeEmailDialog() {
         Dialog dialog = new Dialog();
@@ -269,6 +264,8 @@ public class ProfileView extends VerticalLayout implements BeforeEnterObserver {
         currentPasswordField.setPlaceholder("Current password");
         currentPasswordField.addClassName("profile-input");
         currentPasswordField.getElement().setAttribute("autocomplete", "new-password");
+        currentPasswordField.getElement().setAttribute("name", "profile-email-change-password");
+        currentPasswordField.getElement().setAttribute("id", "profile-email-change-password");
 
         TextField newEmailField = new TextField("New e-mail");
         newEmailField.setPlaceholder("New e-mail");

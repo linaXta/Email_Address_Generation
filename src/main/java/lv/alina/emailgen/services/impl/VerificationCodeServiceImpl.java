@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 
 import lv.alina.emailgen.models.VerificationCodeData;
 import lv.alina.emailgen.models.enums.VerificationCodeStatus;
-import lv.alina.emailgen.service.IRegistrationVerificationService;
+import lv.alina.emailgen.service.IVerificationCodeService;
 
 @Service
-public class RegistrationVerificationServiceImpl implements IRegistrationVerificationService{
+public class VerificationCodeServiceImpl implements IVerificationCodeService{
 	
 	private static final int CODE_LENGHT = 6;
 	private static final int EXPIRATION_IN_MINUTES = 10;
@@ -38,30 +38,6 @@ public class RegistrationVerificationServiceImpl implements IRegistrationVerific
 		
 		return code;
 	}
-	
-
-//	@Override
-//    public boolean isCodeValid(String email, String code) {
-//    	String normalaizedEmail = normalaize(email);
-//    	String normalizedCode = code == null ? "" : code.trim();
-//    	
-//    	if (normalaizedEmail.isBlank() || normalizedCode.isBlank()) {
-//    		return false;
-//    	}
-//    	
-//    	VerificationCodeData storedDate = verificationCodes.get(normalaizedEmail);
-//    	
-//    	if (storedDate == null) {
-//    		return false;
-//    	}
-//    	
-//    	if (storedDate.getExpiresAt().isBefore(LocalDateTime.now())) {
-//    		verificationCodes.remove(normalaizedEmail);
-//    		return false;
-//    	}
-//    	
-//    	return storedDate.getCode().equals(normalizedCode);
-//    }
 
 	@Override
     public void removeCode(String email) throws Exception{

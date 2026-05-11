@@ -2,11 +2,9 @@ package lv.alina.emailgen.service;
 
 import lv.alina.emailgen.models.enums.VerificationCodeStatus;
 
-public interface IRegistrationVerificationService {
+public interface IVerificationCodeService {
 	
 	String createAndStoreCode(String email) throws Exception;
-
-    //boolean isCodeValid(String email, String code);
 
     void removeCode(String email) throws Exception;
     

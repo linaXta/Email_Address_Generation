@@ -14,7 +14,7 @@ import com.vaadin.flow.router.Route;
 
 import lv.alina.emailgen.service.ICRUDUserService;
 import lv.alina.emailgen.service.IEmailService;
-import lv.alina.emailgen.service.IRegistrationVerificationService;
+import lv.alina.emailgen.service.IVerificationCodeService;
 
 @Route("forgot-password")
 @PageTitle("Forgot Password")
@@ -22,13 +22,13 @@ import lv.alina.emailgen.service.IRegistrationVerificationService;
 public class ForgotPasswordView extends VerticalLayout implements BeforeEnterObserver{
 	
 	private final ICRUDUserService userService;
-    private final IRegistrationVerificationService verificationService;
+    private final IVerificationCodeService verificationService;
     private final IEmailService emailService;
 
     private EmailField emailField;
     private Paragraph message;
     
-    public ForgotPasswordView(ICRUDUserService userService, IRegistrationVerificationService verificationService, IEmailService emailService) {
+    public ForgotPasswordView(ICRUDUserService userService, IVerificationCodeService verificationService, IEmailService emailService) {
 		this.userService = userService;
 		this.verificationService = verificationService;
 		this.emailService = emailService;
@@ -134,7 +134,11 @@ public class ForgotPasswordView extends VerticalLayout implements BeforeEnterObs
             String normalizedEmail = email.trim().toLowerCase();
 
             String code = verificationService.createAndStoreCode(normalizedEmail);
-            emailService.sendVerificationCode(normalizedEmail, code);
+            
+            emailService.sendVerificationCode(normalizedEmail, "Password reset confirmation code",
+            		"Your password reset confirmation code is: " + code + "\n\nThis code is valid for 10 minutes."
+            				+ "\n\nIf you did not request a password reset, please ignore this email."
+            );
 
             getUI().ifPresent(ui -> ui.navigate("forgot-password/confirm?email=" + normalizedEmail));
 
